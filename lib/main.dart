@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:smart_farm_bayam/pages/login_page.dart';
+import 'package:smart_farm_bayam/login_page.dart';
 import 'firebase_options.dart';
 
 void main() async {
