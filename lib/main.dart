@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:smart_farm_bayam/login_page.dart';
 import 'firebase_options.dart';
-import 'login_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,6 +19,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Smart Farm App',
+      theme: ThemeData(primarySwatch: Colors.green),
       home: const LoginPage(),
     );
   }

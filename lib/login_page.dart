@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:smart_farm_bayam/sign_up_page.dart';
 import 'home_page.dart';
 
 class LoginPage extends StatefulWidget {
