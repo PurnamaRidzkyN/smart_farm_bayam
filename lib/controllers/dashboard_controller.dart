@@ -1,56 +1,102 @@
-import 'package:firebase_database/firebase_database.dart';
 import '../models/history_threshold_model.dart';
 import '../helper/manager.dart';
 
 class DashboardController {
-  // Threshold dari Firebase
   late HistoryThreshold thresholds;
-final FirebaseRefs refs;
+  final FirebaseRefs refs;
 
   DashboardController(this.refs);
 
-  // Stream data terakhir
+  // Ambil data terakhir untuk ditampilkan
   Stream<Map<String, dynamic>> getLastSensorData() {
-  return refs.dataRef.onValue.map((event) {
-    if (event.snapshot.value == null) return {}; 
-    final readings = Map<String, dynamic>.from(event.snapshot.value as Map);
-    if (readings.isEmpty) return {};
-    final lastKey = readings.keys.last;
-    final lastData = Map<String, dynamic>.from(readings[lastKey]);
-    return lastData;
-  });
-}
+    return refs.dataRef.onValue.map((event) {
+      final raw = event.snapshot.value;
+      if (raw == null) return {};
 
-  // Ambil thresholds dari Firebase
+      final readings = Map<String, dynamic>.from(raw as Map);
+      if (readings.isEmpty) return {};
+
+      final sortedKeys = readings.keys.map(int.parse).toList()..sort();
+      final lastKey = sortedKeys.last.toString();
+      return Map<String, dynamic>.from(readings[lastKey]);
+    });
+  }
+
+  Future<Map<String, dynamic>> getCurrent() async {
+    final snap = await refs.currentReadingRef.get();
+    if (!snap.exists) return {};
+    return Map<String, dynamic>.from(snap.value as Map);
+  }
+
+  
+
+  Future<void> updateCurrentReading(Map<String, dynamic>? newData) async {
+    if (newData == null || newData.isEmpty) return;
+
+    final snap = await refs.currentReadingRef.get();
+
+    final now = DateTime.now();
+
+    if (!snap.exists) {
+      // Kalau node current_reading belum ada, buat langsung
+      await refs.currentReadingRef.set({
+        ...newData,
+        'timestamp_iso': now.toUtc().toIso8601String(),
+        'unix_ms': now.millisecondsSinceEpoch,
+      });
+      return;
+    }
+
+    // Kalau sudah ada, bisa lanjut logika update
+    final current = Map<String, dynamic>.from(snap.value as Map);
+
+    // update hanya jika perlu
+    await refs.currentReadingRef.set({
+      ...current,
+      ...newData,
+      'timestamp_iso': now.toUtc().toIso8601String(),
+      'unix_ms': now.millisecondsSinceEpoch,
+    });
+  }
+
+  // Load threshold
   Future<void> loadThresholds() async {
     final snapshot = await refs.historyThresholdRef.get();
+
     if (!snapshot.exists) {
-      thresholds = HistoryThreshold(ph: 1.0, tdsPpm: 50.0, ecMsCm: 0.5, tempC: 5.0);
+      thresholds = HistoryThreshold(
+        ph: 1.0,
+        tdsPpm: 50.0,
+        ecMsCm: 0.5,
+        tempC: 5.0,
+      );
     } else {
-      thresholds = HistoryThreshold.fromMap(Map<String, dynamic>.from(snapshot.value as Map));
+      thresholds = HistoryThreshold.fromMap(
+        Map<String, dynamic>.from(snapshot.value as Map),
+      );
     }
   }
 
-  // Helper ambil nilai terakhir dari snapshot history
-  double? getLastValue(DataSnapshot snapshot) {
-    if (!snapshot.exists) return null;
-    final val = snapshot.value;
-    if (val is Map) {
-      final values = val.values.toList();
-      if (values.isEmpty) return null;
-      final last = values.last;
-      if (last is num) return last.toDouble();
-      if (last is String) return double.tryParse(last);
-      return null;
-    } else if (val is num) {
-      return val.toDouble();
-    } else if (val is String) {
-      return double.tryParse(val);
-    }
+  // Ambil last value dari history by MAX KEY (timestamp terakhir)
+  double? getLastValueFromHistory(Map rawMap) {
+    if (rawMap.isEmpty) return null;
+
+    final keys =
+        rawMap.keys
+            .map((e) => int.tryParse(e.toString()))
+            .where((v) => v != null)
+            .map((v) => v!) // aman dipaksa karena sudah difilter
+            .toList()
+          ..sort();
+
+    final lastKey = keys.last.toString();
+    final val = rawMap[lastKey];
+
+    if (val is num) return val.toDouble();
+    if (val is String) return double.tryParse(val);
     return null;
   }
 
-  // Helper ambil threshold dari model
   double getThreshold(String key) {
     switch (key) {
       case 'ph':
@@ -61,72 +107,94 @@ final FirebaseRefs refs;
         return thresholds.ecMsCm;
       case 'temp_c':
         return thresholds.tempC;
-      default:
-        return 0;
     }
+    return 0;
   }
 
-  // Pindahkan data lama ke history dan hapus dari readings
+  // Move old data to history
   Future<void> moveOldDataToHistory(DateTime loginTime) async {
+    // Baca readings sekali
     final snapshot = await refs.dataRef.get();
     if (!snapshot.exists) return;
 
     final readings = Map<String, dynamic>.from(snapshot.value as Map);
+
+    // Baca seluruh history sekali
+    final historySnap = await refs.historyRef.get();
+    final fullHistory = historySnap.exists
+        ? Map<String, dynamic>.from(historySnap.value as Map)
+        : {};
+
     final futures = <Future>[];
 
     for (var entry in readings.entries) {
-      final timestampMs = int.tryParse(entry.key);
-      if (timestampMs == null) continue;
+      final timestamp = int.tryParse(entry.key);
+      if (timestamp == null) continue;
 
-      final entryTime = DateTime.fromMillisecondsSinceEpoch(timestampMs);
-      if (entryTime.isBefore(loginTime)) {
-        final value = entry.value;
-        Map<String, dynamic> data;
+      final entryTime = DateTime.fromMillisecondsSinceEpoch(timestamp);
+      if (!entryTime.isBefore(loginTime)) continue;
 
-        if (value is Map) {
-          data = Map<String, dynamic>.from(value);
-        } else {
-          continue; // skip kalau bukan Map
+      final data = Map<String, dynamic>.from(entry.value);
+
+      // Check 4 sensor
+      for (var key in ['ph', 'tds_ppm', 'ec_ms_cm', 'temp_c']) {
+        final sensorValue = data[key];
+        if (sensorValue == null) continue;
+
+        // Ambil history map per sensor
+        final sensorHistory = (fullHistory[key] is Map)
+            ? Map<String, dynamic>.from(fullHistory[key])
+            : {};
+
+        final lastValue = getLastValueFromHistory(sensorHistory);
+
+        if (lastValue == null ||
+            (sensorValue - lastValue).abs() >= getThreshold(key)) {
+          // Simpan ke history dengan timestamp asli
+          futures.add(
+            refs.historyRef.child(key).child(entry.key).set(sensorValue),
+          );
+
+          // Update cache supaya next compare tidak ngeget lagi
+          sensorHistory[entry.key] = sensorValue;
+          fullHistory[key] = sensorHistory;
         }
-
-        // Simpan ke history per sensor sesuai threshold
-        for (var key in ['ph', 'tds_ppm', 'ec_ms_cm', 'temp_c']) {
-          final sensorValue = data[key];
-          if (sensorValue == null) continue;
-
-          final lastSnapshot = await refs.historyRef.child(key).limitToLast(1).get();
-          final lastValue = getLastValue(lastSnapshot);
-
-          if (lastValue == null || (sensorValue - lastValue).abs() >= getThreshold(key)) {
-            futures.add(refs.historyRef.child(key).child(entry.key).set(sensorValue));
-          }
-        }
-
-        // Hapus dari readings
-        futures.add(refs.dataRef.child(entry.key).remove());
       }
+
+      // Hapus dari readings
+      futures.add(refs.dataRef.child(entry.key).remove());
     }
 
     await Future.wait(futures);
   }
 
-  // Simpan data baru jika melewati threshold
-  Future<void> saveIfChanged(Map<String, dynamic> currentData) async {
-    final futures = <Future>[];
+  // Simpan data baru kalau berubah lebih dari threshold
+  Future<void> saveIfChanged(Map<String, dynamic> newData) async {
+    if (newData.isEmpty) return;
+
+    final current = await getCurrent();
+    bool changed = false;
 
     for (var key in ['ph', 'tds_ppm', 'ec_ms_cm', 'temp_c']) {
-      final value = currentData[key];
-      if (value == null) continue;
+      final oldVal = current[key];
+      final newVal = newData[key];
 
-      final lastSnapshot = await refs.historyRef.child(key).limitToLast(1).get();
-      final lastValue = getLastValue(lastSnapshot);
+      if (oldVal == null || newVal == null) continue;
 
-      if (lastValue == null || (value - lastValue).abs() >= getThreshold(key)) {
-        final nowMs = DateTime.now().millisecondsSinceEpoch.toString();
-        futures.add(refs.historyRef.child(key).child(nowMs).set(value));
+      if ((newVal - oldVal).abs() >= getThreshold(key)) {
+        changed = true;
       }
     }
 
-    await Future.wait(futures);
+    if (!changed) return;
+
+    final unixMs = DateTime.now().millisecondsSinceEpoch.toString();
+
+    for (var key in ['ph', 'tds_ppm', 'ec_ms_cm', 'temp_c']) {
+      final value = newData[key];
+      if (value == null) continue;
+
+      await refs.historyRef.child(key).child(unixMs).set(value);
+    }
   }
 }

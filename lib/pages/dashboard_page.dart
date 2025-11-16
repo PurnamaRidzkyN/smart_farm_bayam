@@ -17,28 +17,48 @@ class _DashboardPageState extends State<DashboardPage> {
   void initState() {
     super.initState();
 
-    // 1. Bersihkan data lama ke history saat login
-    controller.moveOldDataToHistory(DateTime.now());
+    // Bersihkan data lama ke history saat login
+    Future.microtask(() => controller.moveOldDataToHistory(DateTime.now()));
 
-    // 2. Stream realtime untuk UI
+    // Stream realtime untuk UI
     controller.getLastSensorData().listen((newData) {
-      if (newData != null) {
-        setState(() => data = newData);
+      if (newData.isEmpty) return;
 
-        // 3. Simpan ke history per sensor jika threshold tercapai
-        controller.saveIfChanged(newData);
-      }
+      // Update current_reading sesuai rule
+      controller.updateCurrentReading(newData);
+
+      // Simpan ke history per sensor jika threshold tercapai
+      controller.saveIfChanged(newData);
+
+      // Update UI
+      setState(() => data = newData);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Dashboard Smart Farm')),
-      drawer: buildDrawer(context),
-      body: data == null
-          ? const Center(child: CircularProgressIndicator())
-          : buildDashboard(context),
+    return FutureBuilder(
+      future: controller.loadThresholds(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState != ConnectionState.done) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        // Pastikan moveOldDataToHistory hanya dipanggil sekali
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          controller.moveOldDataToHistory(DateTime.now());
+        });
+
+        return Scaffold(
+          appBar: AppBar(title: const Text('Dashboard Smart Farm')),
+          drawer: buildDrawer(context),
+          body: data == null
+              ? const Center(child: CircularProgressIndicator())
+              : buildDashboard(context),
+        );
+      },
     );
   }
 
@@ -83,25 +103,36 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   Widget buildDashboard(BuildContext context) {
-  return Padding(
-    padding: const EdgeInsets.all(16),
-    child: Column(
-      children: [
-        buildSensorCard("pH", "${data?['ph'] ?? '-'}", Icons.science),
-        buildSensorCard("TDS (ppm)", "${data?['tds_ppm'] ?? '-'}", Icons.water_drop),
-        buildSensorCard("EC (mS/cm)", "${data?['ec_ms_cm'] ?? '-'}", Icons.electrical_services),
-        buildSensorCard("Suhu (°C)", "${data?['temp_c'] ?? '-'}", Icons.thermostat),
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          buildSensorCard("pH", "${data?['ph'] ?? '-'}", Icons.science),
+          buildSensorCard(
+            "TDS (ppm)",
+            "${data?['tds_ppm'] ?? '-'}",
+            Icons.water_drop,
+          ),
+          buildSensorCard(
+            "EC (mS/cm)",
+            "${data?['ec_ms_cm'] ?? '-'}",
+            Icons.electrical_services,
+          ),
+          buildSensorCard(
+            "Suhu (°C)",
+            "${data?['temp_c'] ?? '-'}",
+            Icons.thermostat,
+          ),
 
-        const SizedBox(height: 16),
-        Text(
-          "Terakhir update: ${formatIso(data?['timestamp_iso'] as String?)}",
-          style: const TextStyle(fontSize: 14, color: Colors.grey),
-        ),
-      ],
-    ),
-  );
-}
-
+          const SizedBox(height: 16),
+          Text(
+            "Terakhir update: ${formatIso(data?['timestamp_iso'] as String?)}",
+            style: const TextStyle(fontSize: 14, color: Colors.grey),
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget buildDrawer(BuildContext context) {
     return Drawer(

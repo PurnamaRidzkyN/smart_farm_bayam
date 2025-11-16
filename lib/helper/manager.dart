@@ -12,6 +12,12 @@ class FirebaseRefs {
     databaseURL:
         "https://smartfarmbayam-default-rtdb.asia-southeast1.firebasedatabase.app",
   ).ref("devices/esp32_001/readings");
+    DatabaseReference get currentReadingRef => FirebaseDatabase.instanceFor(
+    app: app,
+    databaseURL:
+        "https://smartfarmbayam-default-rtdb.asia-southeast1.firebasedatabase.app",
+  ).ref("devices/esp32_001/current_readings");
+
 
   // History per sensor
   DatabaseReference get historyRef => FirebaseDatabase.instanceFor(
