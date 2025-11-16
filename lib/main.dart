@@ -5,13 +5,16 @@ import 'package:smart_farm_bayam/pages/config_page.dart';
 import 'package:smart_farm_bayam/pages/login_page.dart';
 import 'package:smart_farm_bayam/pages/sign_up_page.dart';
 import 'package:smart_farm_bayam/pages/history_page.dart';
+import 'package:smart_farm_bayam/app_globals.dart';
+import 'package:smart_farm_bayam/pages/device_page.dart';
 import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
+  final app = await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  await AppGlobals.init(app);
   runApp(const MyApp());
 }
 
@@ -33,9 +36,9 @@ class MyApp extends StatelessWidget {
         "/config": (context) => const ConfigPage(),
         // nanti tinggal tambah:
         "/history": (context) => const HistoryPage(),
+        "/device": (context) => const DevicePage(),
         // "/notif": (context)  => const NotificationPage(),
       },
     );
   }
-  
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../controllers/dashboard_controller.dart';
+import '../app_globals.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -9,7 +10,7 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> {
-  final DashboardController controller = DashboardController();
+  final DashboardController controller = DashboardController(AppGlobals.refs);
   Map<String, dynamic>? data;
 
   @override
@@ -70,29 +71,37 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  Widget buildDashboard(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        children: [
-          buildSensorCard("pH", "${data!['ph']}", Icons.science),
-          buildSensorCard("TDS (ppm)", "${data!['tds_ppm']}", Icons.water_drop),
-          buildSensorCard(
-            "EC (mS/cm)",
-            "${data!['ec_ms_cm']}",
-            Icons.electrical_services,
-          ),
-          buildSensorCard("Suhu (°C)", "${data!['temp_c']}", Icons.thermostat),
-
-          const SizedBox(height: 16),
-          Text(
-            "Terakhir update: ${data!['timestamp_iso'] ?? '-'}",
-            style: const TextStyle(fontSize: 14, color: Colors.grey),
-          ),
-        ],
-      ),
-    );
+  String formatIso(String? iso) {
+    if (iso == null || iso.isEmpty) return '-';
+    try {
+      final dt = DateTime.parse(iso).toLocal();
+      return '${dt.day.toString().padLeft(2, '0')}-${dt.month.toString().padLeft(2, '0')}-${dt.year} '
+          '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
+    } catch (e) {
+      return iso; // fallback ke string asli kalau error
+    }
   }
+
+  Widget buildDashboard(BuildContext context) {
+  return Padding(
+    padding: const EdgeInsets.all(16),
+    child: Column(
+      children: [
+        buildSensorCard("pH", "${data?['ph'] ?? '-'}", Icons.science),
+        buildSensorCard("TDS (ppm)", "${data?['tds_ppm'] ?? '-'}", Icons.water_drop),
+        buildSensorCard("EC (mS/cm)", "${data?['ec_ms_cm'] ?? '-'}", Icons.electrical_services),
+        buildSensorCard("Suhu (°C)", "${data?['temp_c'] ?? '-'}", Icons.thermostat),
+
+        const SizedBox(height: 16),
+        Text(
+          "Terakhir update: ${formatIso(data?['timestamp_iso'] as String?)}",
+          style: const TextStyle(fontSize: 14, color: Colors.grey),
+        ),
+      ],
+    ),
+  );
+}
+
 
   Widget buildDrawer(BuildContext context) {
     return Drawer(
@@ -120,6 +129,11 @@ class _DashboardPageState extends State<DashboardPage> {
             leading: const Icon(Icons.notifications),
             title: const Text("Pemberitahuan"),
             onTap: () => Navigator.pushNamed(context, "/notif"),
+          ),
+          ListTile(
+            leading: const Icon(Icons.devices),
+            title: const Text("Kontrol Device"),
+            onTap: () => Navigator.pushNamed(context, "/device"),
           ),
           ListTile(
             leading: const Icon(Icons.exit_to_app),

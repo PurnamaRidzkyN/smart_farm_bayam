@@ -64,7 +64,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '694075691841',
     projectId: 'smartfarmbayam',
     storageBucket: 'smartfarmbayam.firebasestorage.app',
-    iosClientId: '694075691841-nnt9kv8jklub44fpkhjpshpr877c8nsj.apps.googleusercontent.com',
+    iosClientId:
+        '694075691841-nnt9kv8jklub44fpkhjpshpr877c8nsj.apps.googleusercontent.com',
     iosBundleId: 'com.example.smartFarmBayam',
   );
 
@@ -74,7 +75,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '694075691841',
     projectId: 'smartfarmbayam',
     storageBucket: 'smartfarmbayam.firebasestorage.app',
-    iosClientId: '694075691841-nnt9kv8jklub44fpkhjpshpr877c8nsj.apps.googleusercontent.com',
+    iosClientId:
+        '694075691841-nnt9kv8jklub44fpkhjpshpr877c8nsj.apps.googleusercontent.com',
     iosBundleId: 'com.example.smartFarmBayam',
   );
 

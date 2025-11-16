@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'dashboard_page.dart'; 
+import 'dashboard_page.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -23,18 +23,18 @@ class _SignUpPageState extends State<SignUpPage> {
       );
 
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Registrasi berhasil!')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Registrasi berhasil!')));
 
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const DashboardPage()),
       );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Registrasi gagal: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Registrasi gagal: $e')));
     }
   }
 
@@ -56,11 +56,7 @@ class _SignUpPageState extends State<SignUpPage> {
                   color: const Color(0xFF4CAF50), // hijau daun
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: const Icon(
-                  Icons.eco,
-                  size: 60,
-                  color: Colors.white,
-                ),
+                child: const Icon(Icons.eco, size: 60, color: Colors.white),
               ),
               const SizedBox(height: 20),
 
@@ -81,8 +77,10 @@ class _SignUpPageState extends State<SignUpPage> {
                   hintText: 'Email',
                   filled: true,
                   fillColor: Colors.white,
-                  contentPadding:
-                      const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                  contentPadding: const EdgeInsets.symmetric(
+                    vertical: 14,
+                    horizontal: 16,
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(25),
                     borderSide: BorderSide.none,
@@ -99,8 +97,10 @@ class _SignUpPageState extends State<SignUpPage> {
                   hintText: 'Password',
                   filled: true,
                   fillColor: Colors.white,
-                  contentPadding:
-                      const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                  contentPadding: const EdgeInsets.symmetric(
+                    vertical: 14,
+                    horizontal: 16,
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(25),
                     borderSide: BorderSide.none,

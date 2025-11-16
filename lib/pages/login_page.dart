@@ -29,9 +29,9 @@ class _LoginPageState extends State<LoginPage> {
         MaterialPageRoute(builder: (context) => const DashboardPage()),
       );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Login gagal: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Login gagal: $e')));
     }
   }
 
@@ -53,11 +53,7 @@ class _LoginPageState extends State<LoginPage> {
                   color: const Color(0xFF4CAF50), // hijau daun
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: const Icon(
-                  Icons.eco,
-                  size: 60,
-                  color: Colors.white,
-                ),
+                child: const Icon(Icons.eco, size: 60, color: Colors.white),
               ),
               const SizedBox(height: 20),
 
@@ -79,8 +75,10 @@ class _LoginPageState extends State<LoginPage> {
                   hintText: 'Email',
                   filled: true,
                   fillColor: Colors.white,
-                  contentPadding:
-                      const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                  contentPadding: const EdgeInsets.symmetric(
+                    vertical: 14,
+                    horizontal: 16,
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(25),
                     borderSide: BorderSide.none,
@@ -97,8 +95,10 @@ class _LoginPageState extends State<LoginPage> {
                   hintText: 'Password',
                   filled: true,
                   fillColor: Colors.white,
-                  contentPadding:
-                      const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                  contentPadding: const EdgeInsets.symmetric(
+                    vertical: 14,
+                    horizontal: 16,
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(25),
                     borderSide: BorderSide.none,
@@ -163,7 +163,9 @@ class _LoginPageState extends State<LoginPage> {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const SignUpPage()),
+                        MaterialPageRoute(
+                          builder: (context) => const SignUpPage(),
+                        ),
                       );
                     },
                     child: const Text(
@@ -171,7 +173,8 @@ class _LoginPageState extends State<LoginPage> {
                       style: TextStyle(
                         color: Colors.black,
                         fontWeight: FontWeight.bold,
-                        decoration: TextDecoration.underline, // opsional agar terlihat bisa diklik
+                        decoration: TextDecoration
+                            .underline, // opsional agar terlihat bisa diklik
                       ),
                     ),
                   ),

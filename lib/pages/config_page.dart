@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../controllers/config_controller.dart';
 import '../models/config_model.dart';
+import '../app_globals.dart';
 
 class ConfigPage extends StatefulWidget {
   const ConfigPage({super.key});
@@ -10,7 +11,7 @@ class ConfigPage extends StatefulWidget {
 }
 
 class _ConfigPageState extends State<ConfigPage> {
-  final controller = ConfigController();
+  final controller = ConfigController(AppGlobals.refs);
   final Map<String, TextEditingController> fields = {
     'ph_min': TextEditingController(),
     'ph_max': TextEditingController(),
@@ -20,6 +21,9 @@ class _ConfigPageState extends State<ConfigPage> {
     'ec_max_ms_cm': TextEditingController(),
     'temp_min_c': TextEditingController(),
     'temp_max_c': TextEditingController(),
+    'light_on_hour': TextEditingController(),
+    'light_off_hour': TextEditingController(),
+    'is_manual': TextEditingController(),
   };
 
   @override
@@ -51,6 +55,9 @@ class _ConfigPageState extends State<ConfigPage> {
       ecMax: double.tryParse(fields['ec_max_ms_cm']!.text) ?? 0,
       tempMin: double.tryParse(fields['temp_min_c']!.text) ?? 0,
       tempMax: double.tryParse(fields['temp_max_c']!.text) ?? 0,
+      isManual: fields['is_manual']!.text.toLowerCase() == 'true',
+      lightOnHour: int.tryParse(fields['light_on_hour']!.text) ?? 6,
+      lightOffHour: int.tryParse(fields['light_off_hour']!.text) ?? 18,
     );
 
     controller.saveConfig(config);
@@ -90,7 +97,9 @@ class _ConfigPageState extends State<ConfigPage> {
           const SizedBox(height: 20),
           ElevatedButton(
             onPressed: _save,
-            style: ElevatedButton.styleFrom(minimumSize: const Size(double.infinity, 48)),
+            style: ElevatedButton.styleFrom(
+              minimumSize: const Size(double.infinity, 48),
+            ),
             child: const Text('Simpan Perubahan'),
           ),
         ],

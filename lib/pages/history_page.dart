@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../controllers/history_controller.dart';
 import 'package:fl_chart/fl_chart.dart';
+import '../app_globals.dart';
 
 class HistoryPage extends StatefulWidget {
   const HistoryPage({super.key});
@@ -10,7 +11,7 @@ class HistoryPage extends StatefulWidget {
 }
 
 class _HistoryPageState extends State<HistoryPage> {
-  final HistoryController controller = HistoryController();
+  final HistoryController controller = HistoryController(AppGlobals.refs);
   Map<String, double> thresholds = {};
   Map<String, Map<String, double>> historyData = {};
   bool loading = true;
@@ -69,9 +70,7 @@ class _HistoryPageState extends State<HistoryPage> {
       child: LineChart(
         LineChartData(
           titlesData: FlTitlesData(
-            bottomTitles: AxisTitles(
-              sideTitles: SideTitles(showTitles: false),
-            ),
+            bottomTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
           ),
           borderData: FlBorderData(show: true),
           lineBarsData: [
@@ -92,15 +91,24 @@ class _HistoryPageState extends State<HistoryPage> {
     List<String> sensors = ['ph', 'tds_ppm', 'ec_ms_cm', 'temp_c'];
     List<TableRow> rows = [
       TableRow(
-        children: sensors.map((s) => Padding(
-          padding: const EdgeInsets.all(8),
-          child: Text(s.toUpperCase(), style: const TextStyle(fontWeight: FontWeight.bold)),
-        )).toList(),
+        children: sensors
+            .map(
+              (s) => Padding(
+                padding: const EdgeInsets.all(8),
+                child: Text(
+                  s.toUpperCase(),
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+            )
+            .toList(),
       ),
     ];
 
     // Ambil max length
-    int maxLength = historyData.values.map((e) => e.length).fold(0, (p, c) => c > p ? c : p);
+    int maxLength = historyData.values
+        .map((e) => e.length)
+        .fold(0, (p, c) => c > p ? c : p);
     List<String> timestamps = [];
     for (int i = 0; i < maxLength; i++) {
       timestamps.add(i.toString());
@@ -120,10 +128,7 @@ class _HistoryPageState extends State<HistoryPage> {
       );
     }
 
-    return Table(
-      border: TableBorder.all(),
-      children: rows,
-    );
+    return Table(border: TableBorder.all(), children: rows);
   }
 
   @override
@@ -135,7 +140,10 @@ class _HistoryPageState extends State<HistoryPage> {
           : ListView(
               padding: const EdgeInsets.all(16),
               children: [
-                const Text("Setting Threshold", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                const Text(
+                  "Setting Threshold",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(height: 12),
                 buildThresholdField('ph'),
                 buildThresholdField('tds_ppm'),
@@ -146,18 +154,29 @@ class _HistoryPageState extends State<HistoryPage> {
                   child: const Text("Simpan Threshold"),
                 ),
                 const SizedBox(height: 24),
-                const Text("Trend Chart", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                const Text(
+                  "Trend Chart",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(height: 12),
-                ...historyData.entries.map((e) => Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(e.key.toUpperCase(), style: const TextStyle(fontWeight: FontWeight.bold)),
-                    buildChart(e.key, e.value),
-                    const SizedBox(height: 24),
-                  ],
-                )),
+                ...historyData.entries.map(
+                  (e) => Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        e.key.toUpperCase(),
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      buildChart(e.key, e.value),
+                      const SizedBox(height: 24),
+                    ],
+                  ),
+                ),
                 const SizedBox(height: 24),
-                const Text("Data Table", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                const Text(
+                  "Data Table",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(height: 12),
                 buildTable(),
               ],

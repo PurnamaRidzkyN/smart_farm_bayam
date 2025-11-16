@@ -1,17 +1,14 @@
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_database/firebase_database.dart';
 import '../models/config_model.dart';
+import '../helper/manager.dart';
 
 class ConfigController {
-  final DatabaseReference _ref = FirebaseDatabase.instanceFor(
-    app: Firebase.app(),
-    databaseURL:
-        "https://smartfarmbayam-default-rtdb.asia-southeast1.firebasedatabase.app",
-  ).ref("app/config/thresholds");
+  final FirebaseRefs refs;
+
+  ConfigController(this.refs);
 
   // Load config
   Future<ConfigModel?> loadConfig() async {
-    final snapshot = await _ref.get();
+    final snapshot = await refs.configThresholdRef.get();
     if (!snapshot.exists) return null;
 
     final data = Map<String, dynamic>.from(snapshot.value as Map);
@@ -20,6 +17,6 @@ class ConfigController {
 
   // Save config
   Future<void> saveConfig(ConfigModel config) async {
-    await _ref.set(config.toMap());
+    await refs.configThresholdRef.set(config.toMap());
   }
 }
