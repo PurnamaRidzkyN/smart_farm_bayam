@@ -16,23 +16,28 @@ class _DashboardPageState extends State<DashboardPage> {
   @override
   void initState() {
     super.initState();
-
+      controller.getCurrent().then((initial) {
+          setState(() {
+            data = initial ?? {};
+          });
+        });
     // Bersihkan data lama ke history saat login
     Future.microtask(() => controller.moveOldDataToHistory(DateTime.now()));
 
     // Stream realtime untuk UI
-    controller.getLastSensorData().listen((newData) {
-      if (newData.isEmpty) return;
-
-      // Update current_reading sesuai rule
+    controller.getLastSensorData().listen((newData) async {
+    if (newData.isNotEmpty) {
       controller.updateCurrentReading(newData);
-
-      // Simpan ke history per sensor jika threshold tercapai
       controller.saveIfChanged(newData);
+    }
 
-      // Update UI
-      setState(() => data = newData);
+    final latest = await controller.getCurrent();
+    print("LATEST CURRENT READING: $latest");
+
+    setState(() {
+      data = latest ?? {};
     });
+  });
   }
 
   @override
