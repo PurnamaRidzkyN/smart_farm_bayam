@@ -17,28 +17,28 @@ class _DashboardPageState extends State<DashboardPage> {
   @override
   void initState() {
     super.initState();
-      controller.getCurrent().then((initial) {
-          setState(() {
-            data = initial ?? {};
-          });
-        });
+    controller.getCurrent().then((initial) {
+      setState(() {
+        data = initial ?? {};
+      });
+    });
     // Bersihkan data lama ke history saat login
     Future.microtask(() => controller.moveOldDataToHistory(DateTime.now()));
 
     // Stream realtime untuk UI
     controller.getLastSensorData().listen((newData) async {
-    if (newData.isNotEmpty) {
-      controller.updateCurrentReading(newData);
-      controller.saveIfChanged(newData);
-    }
+      if (newData.isNotEmpty) {
+        controller.updateCurrentReading(newData);
+        controller.saveIfChanged(newData);
+      }
 
-    final latest = await controller.getCurrent();
-    print("LATEST CURRENT READING: $latest");
+      final latest = await controller.getCurrent();
+      print("LATEST CURRENT READING: $latest");
 
-    setState(() {
-      data = latest ?? {};
+      setState(() {
+        data = latest ?? {};
+      });
     });
-  });
   }
 
   @override
@@ -47,131 +47,147 @@ class _DashboardPageState extends State<DashboardPage> {
       future: controller.loadThresholds(),
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
+          return const Center(child: CircularProgressIndicator());
         }
 
-        // Pastikan moveOldDataToHistory hanya dipanggil sekali
         WidgetsBinding.instance.addPostFrameCallback((_) {
           controller.moveOldDataToHistory(DateTime.now());
         });
 
-        return Scaffold(
-          appBar: AppBar(title: const Text('Dashboard Smart Farm')),
-          drawer: buildDrawer(context),
-          body: data == null
-              ? const Center(child: CircularProgressIndicator())
-              : buildDashboard(context),
-        );
+        return data == null
+            ? const Center(child: CircularProgressIndicator())
+            : buildDashboard(context);
       },
     );
   }
 
   Widget buildDashboard(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      color: const Color(0xFFE6FFF2), // Soft green background
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(28),
-                boxShadow: [
-                  BoxShadow(
-                    blurRadius: 12,
-                    color: Colors.black.withOpacity(0.05),
-                    offset: const Offset(0, 4),
-                  )
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Header
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: const [
-                      Text(
-                        "Smart Farm",
-                        style: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  // Status Hari Ini
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFDFFBEF),
-                      borderRadius: BorderRadius.circular(16),
+    return SafeArea(
+      child: Container(
+        width: double.infinity,
+        color: const Color(0xFFE6FFF2),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+          child: Column(
+            children: [
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(28),
+                  boxShadow: [
+                    BoxShadow(
+                      blurRadius: 12,
+                      color: Colors.black.withOpacity(0.05),
+                      offset: const Offset(0, 4),
                     ),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.local_florist,
-                            size: 40, color: Colors.green),
-                        const SizedBox(width: 12),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text("Status Hari Ini",
-                                style: TextStyle(
-                                    fontSize: 16, fontWeight: FontWeight.bold)),
-                            Text(
-                              formatIso(data?["timestamp_iso"]),
-                              style: const TextStyle(fontSize: 14),
-                            ),
-                          ],
-                        )
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Header
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: const [
+                        Text(
+                          "Smart Farm",
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ],
                     ),
-                  ),
 
-                  const SizedBox(height: 20),
+                    const SizedBox(height: 16),
 
-                  // Grid sensor 2x2
-                  GridView(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 14,
-                      mainAxisSpacing: 14,
-                      childAspectRatio: 1.1,
+                    // Status Hari Ini
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFDFFBEF),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.local_florist,
+                            size: 40,
+                            color: Colors.green,
+                          ),
+                          const SizedBox(width: 12),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                "Status Hari Ini",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                formatIso(data?["timestamp_iso"]),
+                                style: const TextStyle(fontSize: 14),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
-                    children: [
-                      sensorBox("pH Level", "${data?['ph'] ?? '-'}",
-                          getDotColor("ph")),
-                      sensorBox("Temperature", "${data?['temp_c'] ?? '-'}°C",
-                          getDotColor("temp_c")),
-                      sensorBox("TDS (ppm)", "${data?['tds_ppm'] ?? '-'}",
-                          getDotColor("tds_ppm")),
-                      sensorBox("EC", "${data?['ec_ms_cm'] ?? '-'}",
-                          getDotColor("ec_ms_cm")),
-                    ],
-                  ),
 
-                  const SizedBox(height: 24),
+                    const SizedBox(height: 20),
 
-                  // Legend
-                  statusLegend(Colors.green, "Normal"),
-                  const SizedBox(height: 6),
-                  statusLegend(Colors.orange, "Warning"),
-                  const SizedBox(height: 6),
-                  statusLegend(Colors.red, "Danger"),
-                ],
+                    // Grid sensor 2x2
+                    GridView(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            crossAxisSpacing: 14,
+                            mainAxisSpacing: 14,
+                            childAspectRatio: 1.1,
+                          ),
+                      children: [
+                        sensorBox(
+                          "pH Level",
+                          "${data?['ph'] ?? '-'}",
+                          getDotColor("ph"),
+                        ),
+                        sensorBox(
+                          "Temperature",
+                          "${data?['temp_c'] ?? '-'}°C",
+                          getDotColor("temp_c"),
+                        ),
+                        sensorBox(
+                          "TDS (ppm)",
+                          "${data?['tds_ppm'] ?? '-'}",
+                          getDotColor("tds_ppm"),
+                        ),
+                        sensorBox(
+                          "EC",
+                          "${data?['ec_ms_cm'] ?? '-'}",
+                          getDotColor("ec_ms_cm"),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    // Legend
+                    statusLegend(Colors.green, "Normal"),
+                    const SizedBox(height: 6),
+                    statusLegend(Colors.orange, "Warning"),
+                    const SizedBox(height: 6),
+                    statusLegend(Colors.red, "Danger"),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -197,25 +213,19 @@ class _DashboardPageState extends State<DashboardPage> {
 
           Text(
             value,
-            style: const TextStyle(
-              fontSize: 26,
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
           ),
 
           const SizedBox(height: 6),
 
-          Text(
-            title,
-            style: const TextStyle(fontSize: 13),
-          ),
+          Text(title, style: const TextStyle(fontSize: 13)),
         ],
       ),
     );
   }
 
   //                       STATUS LEGEND (NORMAL/WARNING/DANGER)
-  
+
   Widget statusLegend(Color color, String text) {
     return Row(
       children: [
@@ -250,47 +260,5 @@ class _DashboardPageState extends State<DashboardPage> {
     } catch (e) {
       return iso;
     }
-  }
-
-  Widget buildDrawer(BuildContext context) {
-    return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: [
-          const DrawerHeader(
-            decoration: BoxDecoration(color: Colors.green),
-            child: Text(
-              "Menu",
-              style: TextStyle(color: Colors.white, fontSize: 20),
-            ),
-          ),
-          ListTile(
-            leading: const Icon(Icons.settings),
-            title: const Text("Config"),
-            onTap: () => Navigator.pushNamed(context, "/config"),
-          ),
-          ListTile(
-            leading: const Icon(Icons.history),
-            title: const Text("History"),
-            onTap: () => Navigator.pushNamed(context, "/history"),
-          ),
-          ListTile(
-            leading: const Icon(Icons.notifications),
-            title: const Text("Pemberitahuan"),
-            onTap: () => Navigator.pushNamed(context, "/notif"),
-          ),
-          ListTile(
-            leading: const Icon(Icons.devices),
-            title: const Text("Kontrol Device"),
-            onTap: () => Navigator.pushNamed(context, "/device"),
-          ),
-          ListTile(
-            leading: const Icon(Icons.exit_to_app),
-            title: const Text("Keluar Aplikasi"),
-            onTap: () => Navigator.pop(context),
-          ),
-        ],
-      ),
-    );
   }
 }
