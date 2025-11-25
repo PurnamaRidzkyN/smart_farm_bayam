@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import '../controllers/login_controller.dart';
+import 'forgot_password_page.dart';
 import 'dashboard_page.dart';
-import 'sign_up_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -11,74 +11,45 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final _auth = FirebaseAuth.instance;
-  bool _obscurePassword = true;
-
-  void _login() async {
-    try {
-      await _auth.signInWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
-      );
-
-      if (!mounted) return;
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const DashboardPage()),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Login gagal: $e')));
-    }
-  }
+  final controller = LoginController();
+  bool obscure = true;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFCDECC2), // warna hijau muda
+      backgroundColor: const Color(0xFFCDECC2),
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 32),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // LOGO
               Container(
                 width: 90,
                 height: 90,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF4CAF50), // hijau daun
+                  color: const Color(0xFF4CAF50),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: const Icon(Icons.eco, size: 60, color: Colors.white),
               ),
               const SizedBox(height: 20),
-
-              // Nama Aplikasi
               const Text(
                 "Smart Farm",
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87,
                 ),
               ),
               const SizedBox(height: 30),
 
-              // Username (Email)
+              // Email
               TextField(
-                controller: _emailController,
+                controller: controller.emailController,
                 decoration: InputDecoration(
                   hintText: 'Email',
                   filled: true,
                   fillColor: Colors.white,
-                  contentPadding: const EdgeInsets.symmetric(
-                    vertical: 14,
-                    horizontal: 16,
-                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(25),
                     borderSide: BorderSide.none,
@@ -89,30 +60,23 @@ class _LoginPageState extends State<LoginPage> {
 
               // Password
               TextField(
-                controller: _passwordController,
-                obscureText: _obscurePassword,
+                controller: controller.passwordController,
+                obscureText: obscure,
                 decoration: InputDecoration(
                   hintText: 'Password',
                   filled: true,
                   fillColor: Colors.white,
-                  contentPadding: const EdgeInsets.symmetric(
-                    vertical: 14,
-                    horizontal: 16,
-                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(25),
                     borderSide: BorderSide.none,
                   ),
                   suffixIcon: IconButton(
                     icon: Icon(
-                      _obscurePassword
-                          ? Icons.visibility_off
-                          : Icons.visibility,
-                      color: Colors.grey[700],
+                      obscure ? Icons.visibility_off : Icons.visibility,
                     ),
                     onPressed: () {
                       setState(() {
-                        _obscurePassword = !_obscurePassword;
+                        obscure = !obscure;
                       });
                     },
                   ),
@@ -125,60 +89,27 @@ class _LoginPageState extends State<LoginPage> {
                 width: double.infinity,
                 height: 48,
                 child: ElevatedButton(
-                  onPressed: _login,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF4CAF50),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(25),
                     ),
                   ),
-                  child: const Text(
-                    'Login',
-                    style: TextStyle(fontSize: 16, color: Colors.white),
-                  ),
+                  onPressed: () => controller.login(context),
+                  child: const Text('Login', style: TextStyle(color: Colors.white)),
                 ),
               ),
 
               const SizedBox(height: 12),
 
-              // Forgot Password
               TextButton(
                 onPressed: () {
-                  // nanti bisa diarahkan ke halaman lupa password
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const ForgotPasswordPage()),
+                  );
                 },
-                child: const Text(
-                  'Forgot Password ?',
-                  style: TextStyle(color: Colors.black87),
-                ),
-              ),
-
-              const SizedBox(height: 8),
-
-              // Sign Up
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text("New here? "),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const SignUpPage(),
-                        ),
-                      );
-                    },
-                    child: const Text(
-                      "Sign Up",
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontWeight: FontWeight.bold,
-                        decoration: TextDecoration
-                            .underline, // opsional agar terlihat bisa diklik
-                      ),
-                    ),
-                  ),
-                ],
+                child: const Text('Forgot Password ?'),
               ),
             ],
           ),
