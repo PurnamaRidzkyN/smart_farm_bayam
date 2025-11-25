@@ -73,12 +73,6 @@ class _ConfigPageState extends State<ConfigPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFE8FFF4),
-      appBar: AppBar(
-        title: const Text("Setting"),
-        centerTitle: true,
-        backgroundColor: Colors.white,
-        elevation: 0,
-      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
