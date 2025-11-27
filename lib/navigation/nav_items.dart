@@ -16,11 +16,19 @@ class NavItem {
 }
 
 final List<NavItem> navItems = [
-  NavItem(icon: Icons.dashboard, label: "Dashboard", page: DashboardPage()),
-  NavItem(icon: Icons.warning, label: "Alert", page: AlertPage()),
-  NavItem(icon: Icons.settings, label: "Config", page: ConfigPage()),
+  NavItem(icon: Icons.home, label: "Home", page: DashboardPage()),
+  NavItem(icon: Icons.tune, label: "Control", page: DevicePage()),
+
+  // INDEX 2 = OTHERS → TIDAK PUNYA PAGE, HANYA BUKA POPUP
+  NavItem(icon: Icons.dashboard_customize, label: "Others", page: SizedBox()),
+
   NavItem(icon: Icons.history, label: "History", page: HistoryPage()),
-  NavItem(icon: Icons.devices, label: "Device", page: DevicePage()),
-  NavItem(icon: Icons.person, label: "User", page: UserPage()),
-  NavItem(icon: Icons.info, label: "Information", page: InformationPage()),
+  NavItem(icon: Icons.settings, label: "Config", page: ConfigPage()),
 ];
+
+/// PAGE LAIN UNTUK POPUP "OTHERS"
+class OthersPages {
+  static final info = InformationPage();
+  static final alert = AlertPage();
+  static final user = UserPage();
+}
