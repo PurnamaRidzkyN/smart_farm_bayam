@@ -17,15 +17,6 @@ class _DevicePageState extends State<DevicePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFE8FFF4), // hijau sangat muda (background)
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        title: const Text(
-          'Control Device',
-          style: TextStyle(color: Colors.black87),
-        ),
-        centerTitle: true,
-      ),
       body: StreamBuilder<DeviceModel>(
         stream: controller.getDeviceStream(),
         builder: (context, snapshot) {
