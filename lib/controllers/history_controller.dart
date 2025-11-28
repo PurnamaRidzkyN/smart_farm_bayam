@@ -52,4 +52,12 @@ class HistoryController {
 
     return filtered;
   }
+
+  Future<void> deleteAllHistory() async {
+    try {
+      await refs.historyRef.remove(); // hapus seluruh node history
+    } catch (e) {
+      print("Gagal hapus semua history: $e");
+    }
+  }
 }

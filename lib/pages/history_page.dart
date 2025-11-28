@@ -41,8 +41,7 @@ class _HistoryPageState extends State<HistoryPage> {
   // =====================================================================
   // 	RELOAD FILTER + AUTO BUKA POPUP
   // =====================================================================
-  Future<void> _reloadFilter({bool openPopup = false}) async { 
-
+  Future<void> _reloadFilter({bool openPopup = false}) async {
     final newData = await controller.loadHistoryFiltered(
       selectedSensor,
       startDate,
@@ -71,7 +70,9 @@ class _HistoryPageState extends State<HistoryPage> {
         return AlertDialog(
           backgroundColor: Colors.white,
           contentPadding: const EdgeInsets.all(20),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
           content: SizedBox(
             width: double.maxFinite,
             child: Column(
@@ -101,13 +102,16 @@ class _HistoryPageState extends State<HistoryPage> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),
-                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 12,
+                      horizontal: 20,
+                    ),
                   ),
                   child: const Text(
                     "Simpan Threshold",
                     style: TextStyle(color: Colors.white),
                   ),
-                )
+                ),
               ],
             ),
           ),
@@ -129,10 +133,7 @@ class _HistoryPageState extends State<HistoryPage> {
           text: thresholds[key]?.toString() ?? "",
         ),
         keyboardType: const TextInputType.numberWithOptions(decimal: true),
-        decoration: InputDecoration(
-          labelText: label,
-          border: InputBorder.none,
-        ),
+        decoration: InputDecoration(labelText: label, border: InputBorder.none),
         onChanged: (v) {
           final p = double.tryParse(v);
           if (p != null) thresholds[key] = p;
@@ -162,7 +163,10 @@ class _HistoryPageState extends State<HistoryPage> {
                 (selectedSensor == "ph" ? "pH" : selectedSensor)
                     .replaceAll("_", " ")
                     .toUpperCase(),
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 20),
               Expanded(child: buildChart()),
@@ -186,7 +190,9 @@ class _HistoryPageState extends State<HistoryPage> {
         borderData: FlBorderData(show: true),
         titlesData: FlTitlesData(
           bottomTitles: AxisTitles(
-            sideTitles: SideTitles(showTitles: false), // Sembunyikan label bawah
+            sideTitles: SideTitles(
+              showTitles: false,
+            ), // Sembunyikan label bawah
           ),
         ),
         lineBarsData: [
@@ -208,7 +214,8 @@ class _HistoryPageState extends State<HistoryPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFE8FFF4), // Latar belakang utama
-      body: SafeArea( // 1. Membungkus dengan SafeArea untuk mencegah pemotongan
+      body: SafeArea(
+        // 1. Membungkus dengan SafeArea untuk mencegah pemotongan
         child: loading
             ? const Center(child: CircularProgressIndicator())
             : Padding(
@@ -217,10 +224,9 @@ class _HistoryPageState extends State<HistoryPage> {
                 child: ListView(
                   children: [
                     const SizedBox(height: 20), // Jarak kecil di atas Main Card
-                    
                     // ================= MAIN CARD =================
                     Container(
-                      // 2. Padding di dalam Container memberikan ruang yang cukup 
+                      // 2. Padding di dalam Container memberikan ruang yang cukup
                       //    untuk judul di bagian atas kartu.
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
@@ -241,14 +247,15 @@ class _HistoryPageState extends State<HistoryPage> {
                           const Text(
                             "History",
                             style: TextStyle(
-                              fontSize: 24, // Disesuaikan agar terlihat seperti judul utama di card
+                              fontSize:
+                                  24, // Disesuaikan agar terlihat seperti judul utama di card
                               fontWeight: FontWeight.bold,
                               color: Colors.black,
                             ),
                           ),
 
                           const SizedBox(height: 20),
-                          
+
                           // ---------- Setting Threshold Grouping ----------
                           GestureDetector(
                             onTap: openThresholdPopup,
@@ -256,7 +263,11 @@ class _HistoryPageState extends State<HistoryPage> {
                               padding: const EdgeInsets.symmetric(vertical: 10),
                               child: const Row(
                                 children: [
-                                  Icon(Icons.settings, color: Colors.teal, size: 24),
+                                  Icon(
+                                    Icons.settings,
+                                    color: Colors.teal,
+                                    size: 24,
+                                  ),
                                   SizedBox(width: 8),
                                   Text(
                                     "Setting Threshold",
@@ -271,11 +282,15 @@ class _HistoryPageState extends State<HistoryPage> {
                             ),
                           ),
 
-                          const Divider(height: 24, thickness: 1, color: Color(0xFFE8FFF4)),
+                          const Divider(
+                            height: 24,
+                            thickness: 1,
+                            color: Color(0xFFE8FFF4),
+                          ),
 
                           // ---------- SENSOR GRID LABEL ----------
                           const Text(
-                            "Data Sensor", 
+                            "Data Sensor",
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
@@ -288,23 +303,35 @@ class _HistoryPageState extends State<HistoryPage> {
                           GridView.count(
                             crossAxisCount: 2,
                             shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(), 
+                            physics: const NeverScrollableScrollPhysics(),
                             childAspectRatio: 1.3,
                             mainAxisSpacing: 14,
                             crossAxisSpacing: 14,
                             children: [
                               _sensorButtonIcon("pH", "ph", Icons.science),
-                              _sensorButtonIcon("Temp", "temp_c", Icons.thermostat_outlined),
-                              _sensorButtonIcon("TDS", "tds_ppm", Icons.water_drop_outlined),
-                              _sensorButtonIcon("EC", "ec_ms_cm", Icons.power_outlined),
+                              _sensorButtonIcon(
+                                "Temp",
+                                "temp_c",
+                                Icons.thermostat_outlined,
+                              ),
+                              _sensorButtonIcon(
+                                "TDS",
+                                "tds_ppm",
+                                Icons.water_drop_outlined,
+                              ),
+                              _sensorButtonIcon(
+                                "EC",
+                                "ec_ms_cm",
+                                Icons.power_outlined,
+                              ),
                             ],
                           ),
 
                           const SizedBox(height: 20),
-                          
+
                           // ---------- DATE RANGE LABEL ----------
                           const Text(
-                            "Pilih Rentang Waktu", 
+                            "Pilih Rentang Waktu",
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
@@ -318,22 +345,30 @@ class _HistoryPageState extends State<HistoryPage> {
                             onTap: selectDateRange,
                             child: Container(
                               padding: const EdgeInsets.symmetric(
-                                  vertical: 12, horizontal: 16),
+                                vertical: 12,
+                                horizontal: 16,
+                              ),
                               decoration: BoxDecoration(
                                 color: const Color(0xFFE8FFF4),
                                 borderRadius: BorderRadius.circular(14),
                                 border: Border.all(color: Colors.grey.shade200),
                               ),
                               child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
                                     "${_formatDate(startDate)} - ${_formatDate(endDate)}",
-                                    style:
-                                        const TextStyle(fontSize: 15, color: Colors.black87, fontWeight: FontWeight.w500),
+                                    style: const TextStyle(
+                                      fontSize: 15,
+                                      color: Colors.black87,
+                                      fontWeight: FontWeight.w500,
+                                    ),
                                   ),
-                                  const Icon(Icons.keyboard_arrow_down,
-                                      color: Colors.teal),
+                                  const Icon(
+                                    Icons.keyboard_arrow_down,
+                                    color: Colors.teal,
+                                  ),
                                 ],
                               ),
                             ),
@@ -383,7 +418,7 @@ class _HistoryPageState extends State<HistoryPage> {
         iconColor = Colors.teal;
         bgColor = const Color(0xFFE8FFF4);
     }
-    
+
     // Warna Latar belakang saat terpilih
     final isSelected = key == selectedSensor;
     final buttonColor = isSelected ? bgColor.withOpacity(0.8) : Colors.white;
@@ -398,7 +433,9 @@ class _HistoryPageState extends State<HistoryPage> {
         decoration: BoxDecoration(
           color: buttonColor,
           borderRadius: BorderRadius.circular(18),
-          border: isSelected ? Border.all(color: iconColor.withOpacity(0.5), width: 2) : Border.all(color: Colors.grey.shade200),
+          border: isSelected
+              ? Border.all(color: iconColor.withOpacity(0.5), width: 2)
+              : Border.all(color: Colors.grey.shade200),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.03),
@@ -439,8 +476,12 @@ class _HistoryPageState extends State<HistoryPage> {
   // =====================================================================
   Widget _deleteHistoryButton() {
     return GestureDetector(
-      onTap: () {
-        // Logika delete history (saat ini kosong)
+      onTap: () async {
+        await controller.deleteAllHistory();
+        // optional: kasih feedback biar manusia tau apa yang terjadi
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text("History dihapus")));
       },
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 14),
@@ -475,7 +516,6 @@ class _HistoryPageState extends State<HistoryPage> {
     );
   }
 
-
   // =====================================================================
   // 	DATE RANGE PICKER
   // =====================================================================
@@ -504,8 +544,19 @@ class _HistoryPageState extends State<HistoryPage> {
     if (picked != null) {
       setState(() {
         // Menggunakan tanggal awal jam 00:00:00 dan tanggal akhir jam 23:59:59
-        startDate = DateTime(picked.start.year, picked.start.month, picked.start.day);
-        endDate = DateTime(picked.end.year, picked.end.month, picked.end.day, 23, 59, 59);
+        startDate = DateTime(
+          picked.start.year,
+          picked.start.month,
+          picked.start.day,
+        );
+        endDate = DateTime(
+          picked.end.year,
+          picked.end.month,
+          picked.end.day,
+          23,
+          59,
+          59,
+        );
       });
 
       _reloadFilter();
