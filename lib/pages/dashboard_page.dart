@@ -41,6 +41,15 @@ class _DashboardPageState extends State<DashboardPage> {
     });
   }
 
+  void loadThresholdMap() {
+    thresholds = {
+      "ph": {"min": 0, "max": controller.thresholds.ph},
+      "tds_ppm": {"min": 0, "max": controller.thresholds.tdsPpm},
+      "ec_ms_cm": {"min": 0, "max": controller.thresholds.ecMsCm},
+      "temp_c": {"min": 0, "max": controller.thresholds.tempC},
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
@@ -50,9 +59,8 @@ class _DashboardPageState extends State<DashboardPage> {
           return const Center(child: CircularProgressIndicator());
         }
 
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          controller.moveOldDataToHistory(DateTime.now());
-        });
+        // UPDATE: masukkan threshold ke map lokal
+        loadThresholdMap();
 
         return data == null
             ? const Center(child: CircularProgressIndicator())
@@ -242,14 +250,23 @@ class _DashboardPageState extends State<DashboardPage> {
     if (data == null || !data!.containsKey(key)) return Colors.grey;
     if (!thresholds.containsKey(key)) return Colors.grey;
 
+    // ini bisa disesuaikan dengan data di firebase
     final value = (data![key] ?? 0).toDouble();
-    final min = thresholds[key]["min"] ?? 0;
-    final max = thresholds[key]["max"] ?? 99999;
+    final min = thresholds[key]["min"] ?? 0.0;
+    final max = thresholds[key]["max"] ?? 99999.0;
 
-    if (value < min) return Colors.orange;
+    // --- DANGER ---
+    if (value < min) return Colors.red;
     if (value > max) return Colors.red;
+
+    // --- WARNING (nilai tepat di batas) ---
+    if (value == min) return Colors.orange;
+    if (value == max) return Colors.orange;
+
+    // --- NORMAL ---
     return Colors.green;
   }
+
 
   String formatIso(String? iso) {
     if (iso == null || iso.isEmpty) return "-";

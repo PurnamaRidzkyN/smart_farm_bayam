@@ -19,4 +19,13 @@ class InformationModel {
       'content': content,
     };
   }
+
+  InformationModel copyWith({String? title, String? content}) {
+    return InformationModel(
+      id: id,
+      title: title ?? this.title,
+      content: content ?? this.content,
+    );
+  }
+
 }

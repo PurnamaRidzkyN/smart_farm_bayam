@@ -47,7 +47,47 @@ class _ConfigPageState extends State<ConfigPage> {
     setState(() {});
   }
 
-  void _save() {
+  void _save() async {
+    // === TAMPILKAN KONFIRMASI ===
+    final bool? confirm = await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: const Text(
+            "Konfirmasi",
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          content: const Text(
+            "Apakah Anda yakin ingin menyimpan perubahan konfigurasi?",
+            style: TextStyle(fontSize: 15,),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text(
+                "Batal",
+                style: TextStyle(color: Colors.grey),
+              ),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.teal,
+              ),
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text("Simpan", style: TextStyle(color: Colors.white),),
+            ),
+          ],
+        );
+      },
+    );
+
+    // User menekan "Batal"
+    if (confirm != true) return;
+
+    // === LANJUT PROSES SIMPAN ===
     final config = ConfigModel(
       phMin: double.tryParse(fields['ph_min']!.text) ?? 0,
       phMax: double.tryParse(fields['ph_max']!.text) ?? 0,
@@ -62,7 +102,7 @@ class _ConfigPageState extends State<ConfigPage> {
       lightOffHour: 18,
     );
 
-    controller.saveConfig(config);
+    await controller.saveConfig(config);
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Konfigurasi berhasil disimpan')),
@@ -133,7 +173,7 @@ class _ConfigPageState extends State<ConfigPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text(
-                        "IS MANUAL",
+                        "Control Device (auto)",
                         style: TextStyle(fontSize: 16),
                       ),
                       Switch(

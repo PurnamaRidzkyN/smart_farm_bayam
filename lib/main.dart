@@ -24,7 +24,7 @@ class MyApp extends StatelessWidget {
       title: 'Smart Farm App',
       theme: ThemeData(primarySwatch: Colors.green),
 
-      initialRoute: "/dashboard",
+      initialRoute: "/login",
 
       routes: {
         "/login": (context) => const LoginPage(),

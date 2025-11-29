@@ -477,11 +477,53 @@ class _HistoryPageState extends State<HistoryPage> {
   Widget _deleteHistoryButton() {
     return GestureDetector(
       onTap: () async {
+        // === KONFIRMASI DULU ===
+        final bool? confirm = await showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              title: const Text(
+                "Konfirmasi",
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              content: const Text(
+                "Apakah Anda yakin ingin menghapus semua history?",
+                style: TextStyle(fontSize: 15),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: const Text(
+                    "Batal",
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.redAccent,
+                  ),
+                  onPressed: () => Navigator.pop(context, true),
+                  child: const Text("Hapus", style: TextStyle(color: Colors.white),),
+                ),
+              ],
+            );
+          },
+        );
+
+        // Jika user memilih "Batal"
+        if (confirm != true) return;
+
+        // Jika user memilih "Hapus"
         await controller.deleteAllHistory();
-        // optional: kasih feedback biar manusia tau apa yang terjadi
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text("History dihapus")));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("History berhasil dihapus")),
+        );
+
+        // Reload tampilan history
+        _reloadFilter();
       },
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 14),
@@ -508,13 +550,13 @@ class _HistoryPageState extends State<HistoryPage> {
               ),
             ),
             SizedBox(width: 8),
-            // Menggunakan Icons.refresh yang diputar untuk tampilan "loop"
             Icon(Icons.cached, color: Colors.white, size: 20),
           ],
         ),
       ),
     );
   }
+
 
   // =====================================================================
   // 	DATE RANGE PICKER

@@ -11,39 +11,44 @@ class UserPage extends StatefulWidget {
 
 class _UserPageState extends State<UserPage> {
   final UserController controller = UserController(AppGlobals.refs);
-
-  final TextEditingController newUserEmail = TextEditingController();
-  final TextEditingController newUserPassword = TextEditingController();
-
   final TextEditingController changePassword = TextEditingController();
+
+  bool _isPasswordVisible = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("User Profile"),
-        elevation: 0,
-      ),
-      body: SingleChildScrollView(
+      backgroundColor: const Color(0xFFE8FFF4),
+
+      body: Padding(
         padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // ======================
-            // PROFILE SECTION
-            // ======================
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.green.withOpacity(0.15),
-                borderRadius: BorderRadius.circular(12),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+          ),
+
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                "User",
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-              child: Row(
+
+              const SizedBox(height: 20),
+
+              Row(
                 children: [
                   const CircleAvatar(
-                    radius: 30,
-                    backgroundColor: Colors.green,
-                    child: Icon(Icons.person, color: Colors.white, size: 35),
+                    radius: 28,
+                    backgroundColor: Colors.teal,
+                    child: Icon(Icons.person, color: Colors.white, size: 32),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
@@ -51,114 +56,199 @@ class _UserPageState extends State<UserPage> {
                       AppGlobals.refs.auth.currentUser?.email ??
                           "Tidak ada email",
                       style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
-                  )
+                  ),
                 ],
               ),
-            ),
 
-            const SizedBox(height: 30),
+              const SizedBox(height: 35),
 
-            // ======================
-            // TAMBAH USER BARU
-            // ======================
-            const Text(
-              "Tambah User Baru",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-
-            TextField(
-              controller: newUserEmail,
-              decoration: const InputDecoration(
-                labelText: "Email baru",
-                border: OutlineInputBorder(),
+              const Text(
+                "Ganti Password",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-            const SizedBox(height: 12),
 
-            TextField(
-              controller: newUserPassword,
-              decoration: const InputDecoration(
-                labelText: "Password baru",
-                border: OutlineInputBorder(),
+              const SizedBox(height: 10),
+
+              // 🔥 TextField dengan fungsi show/hide password (Bekerja 100%)
+              StatefulBuilder(
+                builder: (context, setStateSB) {
+                  return TextField(
+                    controller: changePassword,
+                    obscureText: !_isPasswordVisible,
+                    decoration: InputDecoration(
+                      labelText: "Password baru",
+                      border: const OutlineInputBorder(),
+
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _isPasswordVisible
+                              ? Icons.visibility
+                              : Icons.visibility_off,
+                          color: Colors.grey,
+                        ),
+                        onPressed: () {
+                          setStateSB(() {
+                            _isPasswordVisible = !_isPasswordVisible;
+                          });
+                        },
+                      ),
+                    ),
+                  );
+                },
               ),
-              obscureText: true,
-            ),
-            const SizedBox(height: 12),
 
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () async {
-                  try {
-                    await controller.createUser(
-                      newUserEmail.text,
-                      newUserPassword.text,
-                    );
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text("User berhasil ditambahkan"),
+              const SizedBox(height: 12),
+
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.teal,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  onPressed: () async {
+                    if (changePassword.text.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content: Text("Password tidak boleh kosong")),
+                      );
+                      return;
+                    }
+
+                    // 🔥 Dialog Konfirmasi Update Password
+                    final bool? confirmUpdate = await showDialog(
+                      context: context,
+                      builder: (context) => Dialog(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                "Konfirmasi",
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+
+                              const SizedBox(height: 12),
+
+                              const Text(
+                                "Apakah Anda yakin ingin memperbarui password Anda?",
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  color: Colors.black87,
+                                  height: 1.3,
+                                ),
+                              ),
+
+                              const SizedBox(height: 20),
+
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  TextButton(
+                                    onPressed: () =>
+                                        Navigator.pop(context, false),
+                                    child: const Text(
+                                      "Batal",
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                  ),
+
+                                  const SizedBox(width: 8),
+
+                                  ElevatedButton(
+                                    onPressed: () =>
+                                        Navigator.pop(context, true),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.teal,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(30),
+                                      ),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 20,
+                                        vertical: 10,
+                                      ),
+                                    ),
+                                    child: const Text(
+                                      "Update",
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     );
-                    newUserEmail.clear();
-                    newUserPassword.clear();
-                  } catch (e) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text("Error: $e")),
-                    );
-                  }
-                },
-                child: const Text("Tambah User"),
+
+                    // Jika user setuju update
+                    if (confirmUpdate == true) {
+                      try {
+                        await controller.updatePassword(changePassword.text);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content: Text("Password berhasil diperbarui")),
+                        );
+                        changePassword.clear();
+                      } catch (e) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text("Error: $e")),
+                        );
+                      }
+                    }
+                  },
+                  child: const Text(
+                    "Update Password",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
               ),
-            ),
 
-            const SizedBox(height: 30),
+              const Spacer(),
 
-            // ======================
-            // GANTI PASSWORD SENDIRI
-            // ======================
-            const Text(
-              "Ganti Password Anda",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-
-            TextField(
-              controller: changePassword,
-              decoration: const InputDecoration(
-                labelText: "Password baru",
-                border: OutlineInputBorder(),
-              ),
-              obscureText: true,
-            ),
-            const SizedBox(height: 12),
-
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () async {
-                  try {
-                    await controller.updatePassword(changePassword.text);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text("Password berhasil diubah"),
+              GestureDetector(
+                onTap: () => Navigator.pop(context),
+                child: Row(
+                  children: const [
+                    Icon(Icons.arrow_back, size: 20, color: Colors.teal),
+                    SizedBox(width: 6),
+                    Text(
+                      "Back",
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.teal,
+                        fontWeight: FontWeight.w500,
                       ),
-                    );
-                    changePassword.clear();
-                  } catch (e) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text("Error: $e")),
-                    );
-                  }
-                },
-                child: const Text("Update Password"),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
