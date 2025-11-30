@@ -11,7 +11,7 @@ class AlertPage extends StatelessWidget {
 
   String formatTime(int ms) {
     if (ms == 0) return "-";
-    final dt = DateTime.fromMillisecondsSinceEpoch(ms);
+    final dt = DateTime.fromMillisecondsSinceEpoch(ms).toLocal();
     return DateFormat('dd MMM yyyy • HH:mm').format(dt);
   }
 
@@ -44,7 +44,9 @@ class AlertPage extends StatelessWidget {
             width: double.infinity,
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(18), // card utama seperti di gambar
+              borderRadius: BorderRadius.circular(
+                18,
+              ), // card utama seperti di gambar
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -70,7 +72,9 @@ class AlertPage extends StatelessWidget {
                       stream: controller.getAlerts(),
                       builder: (context, snapshot) {
                         if (!snapshot.hasData) {
-                          return const Center(child: CircularProgressIndicator());
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
                         }
 
                         final alerts = snapshot.data!;
@@ -87,15 +91,21 @@ class AlertPage extends StatelessWidget {
                             return Card(
                               elevation: 1,
                               child: ListTile(
-                                leading: const Icon(Icons.warning, color: Colors.red),
-                                title: Text(formatAlertMessage(alert.type, alert.value)),
+                                leading: const Icon(
+                                  Icons.warning,
+                                  color: Colors.red,
+                                ),
+                                title: Text(
+                                  formatAlertMessage(alert.type, alert.value),
+                                ),
                                 subtitle: Text(
                                   "Mulai: ${formatTime(alert.startMs)}\n"
                                   "Selesai: ${formatTime(alert.endMs)}",
                                 ),
                                 trailing: IconButton(
                                   icon: const Icon(Icons.delete),
-                                  onPressed: () => controller.removeAlert(alert.id),
+                                  onPressed: () =>
+                                      controller.removeAlert(alert.id),
                                 ),
                               ),
                             );
@@ -122,11 +132,11 @@ class AlertPage extends StatelessWidget {
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
                           ),
-                        )
+                        ),
                       ],
                     ),
                   ),
-                )
+                ),
               ],
             ),
           ),
