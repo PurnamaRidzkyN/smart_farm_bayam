@@ -9,26 +9,66 @@ class ForgotPasswordPage extends StatefulWidget {
 }
 
 class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
-  final email = TextEditingController();
+  final emailController = TextEditingController();
   final auth = FirebaseAuth.instance;
 
+  // Fungsi utilitas untuk menampilkan SnackBar
+  void _showSnackbar(BuildContext context, String message, Color color) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: color,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
   void reset() async {
+    final emailAddress = emailController.text.trim();
+
+    // 1. Validasi Input Kosong
+    if (emailAddress.isEmpty) {
+      _showSnackbar(context, 'Email tidak boleh kosong.', Colors.red);
+      return;
+    }
+
     try {
-      await auth.sendPasswordResetEmail(email: email.text.trim());
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Email reset password dikirim')),
+      await auth.sendPasswordResetEmail(email: emailAddress);
+
+      // 2. Notifikasi Berhasil (Sukses)
+      _showSnackbar(
+        context,
+        'Tautan reset password telah dikirim ke $emailAddress. Silakan cek email Anda!',
+        Colors.green,
       );
+      
+      // Opsional: Kosongkan field setelah berhasil
+      emailController.clear(); 
+
+    } on FirebaseAuthException catch (e) {
+      // 3. Penanganan Error Spesifik Firebase
+      String errorMessage;
+
+      switch (e.code) {
+        case 'user-not-found':
+        case 'invalid-email':
+          errorMessage = 'Email tidak ditemukan atau tidak valid. Pastikan Anda memasukkan email yang terdaftar.';
+          break;
+        default:
+          errorMessage = 'Gagal mengirim email reset: ${e.message}';
+      }
+
+      _showSnackbar(context, errorMessage, Colors.red);
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Gagal: $e')),
-      );
+      // 4. Penanganan Error Umum
+      _showSnackbar(context, 'Terjadi kesalahan: $e', Colors.red);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFCDECC2),
+      backgroundColor: const Color(0xFFE8FFF4),
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.transparent,
@@ -45,9 +85,10 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                 style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 20),
-
+              // Mengganti nama controller agar konsisten
               TextField(
-                controller: email,
+                controller: emailController, 
+                keyboardType: TextInputType.emailAddress, // Tambahkan ini untuk keyboard yang sesuai
                 decoration: InputDecoration(
                   hintText: "Masukkan email",
                   filled: true,
@@ -58,9 +99,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                   ),
                 ),
               ),
-
               const SizedBox(height: 20),
-
               SizedBox(
                 width: double.infinity,
                 height: 48,
@@ -72,7 +111,10 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                     ),
                   ),
                   onPressed: reset,
-                  child: const Text("Kirim Email"),
+                  child: const Text(
+                    "Kirim Email",
+                    style: TextStyle(color: Colors.white),
+                  ),
                 ),
               ),
             ],

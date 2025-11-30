@@ -119,7 +119,10 @@ class _UserPageState extends State<UserPage> {
                     if (changePassword.text.isEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                            content: Text("Password tidak boleh kosong")),
+                            content: Text("Password tidak boleh kosong"),
+                            backgroundColor: Colors.red,
+                            behavior: SnackBarBehavior.floating,
+                            ),
                       );
                       return;
                     }
@@ -209,14 +212,24 @@ class _UserPageState extends State<UserPage> {
                     if (confirmUpdate == true) {
                       try {
                         await controller.updatePassword(changePassword.text);
+
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                              content: Text("Password berhasil diperbarui")),
+                            content: Text("Password berhasil diperbarui"),
+                            backgroundColor: Colors.green,
+                            behavior: SnackBarBehavior.floating,
+                          ),
                         );
+
                         changePassword.clear();
+
                       } catch (e) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text("Error: $e")),
+                          SnackBar(
+                            content: Text("Gagal memperbarui password (dibutuhkan minimal 6 karakter)"),
+                            backgroundColor: Colors.red,
+                            behavior: SnackBarBehavior.floating,
+                          ),
                         );
                       }
                     }

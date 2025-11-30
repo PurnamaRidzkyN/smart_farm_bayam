@@ -519,7 +519,13 @@ class _HistoryPageState extends State<HistoryPage> {
         // Jika user memilih "Hapus"
         await controller.deleteAllHistory();
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("History berhasil dihapus")),
+          const SnackBar(
+            content: Text(
+              "History berhasil dihapus"
+              ),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+            ),
         );
 
         // Reload tampilan history
