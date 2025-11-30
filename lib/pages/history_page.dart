@@ -11,7 +11,8 @@ class HistoryPage extends StatefulWidget {
 }
 
 class _HistoryPageState extends State<HistoryPage> {
-  final HistoryController controller = HistoryController(AppGlobals.refs);
+  // Anggap ini sudah di-implementasi dan berfungsi
+  final HistoryController controller = HistoryController(AppGlobals.refs); 
 
   Map<String, double> thresholds = {};
   Map<String, double> filteredData = {};
@@ -66,17 +67,16 @@ class _HistoryPageState extends State<HistoryPage> {
     showDialog(
       context: context,
       builder: (context) {
-        // ... (Fungsi openThresholdPopup tidak berubah) ...
         return AlertDialog(
           backgroundColor: Colors.white,
           contentPadding: const EdgeInsets.all(20),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
-          content: SizedBox(
-            width: double.maxFinite,
+          // Hapus `width: double.maxFinite` dari SizedBox
+          content: SingleChildScrollView( // <--- PERBAIKAN UTAMA: Bungkus konten dengan SingleChildScrollView
             child: Column(
-              mainAxisSize: MainAxisSize.min,
+              mainAxisSize: MainAxisSize.min, // <--- Perbaiki agar mengambil ruang minimal vertikal
               children: [
                 const Text(
                   "Setting Threshold",
@@ -133,6 +133,7 @@ class _HistoryPageState extends State<HistoryPage> {
           text: thresholds[key]?.toString() ?? "",
         ),
         keyboardType: const TextInputType.numberWithOptions(decimal: true),
+        // Pastikan InputDecoration tidak terlalu lebar (sudah default, tapi perlu diperhatikan jika ada kustomisasi aneh)
         decoration: InputDecoration(labelText: label, border: InputBorder.none),
         onChanged: (v) {
           final p = double.tryParse(v);
@@ -143,10 +144,9 @@ class _HistoryPageState extends State<HistoryPage> {
   }
 
   // =====================================================================
-  // 	POPUP CHART
+  // 	POPUP CHART (Sudah OK karena menggunakan Expanded di dalam Dialog berukuran tetap)
   // =====================================================================
   void openChartPopup() {
-    // ... (Fungsi openChartPopup tidak berubah) ...
     showDialog(
       context: context,
       builder: (_) => Dialog(
@@ -215,19 +215,17 @@ class _HistoryPageState extends State<HistoryPage> {
     return Scaffold(
       backgroundColor: const Color(0xFFE8FFF4), // Latar belakang utama
       body: SafeArea(
-        // 1. Membungkus dengan SafeArea untuk mencegah pemotongan
+        // Sudah dibungkus dengan SafeArea
         child: loading
             ? const Center(child: CircularProgressIndicator())
             : Padding(
-                // Padding hanya di bagian samping, padding atas diserahkan ke SafeArea + padding Container
+                // Padding hanya di bagian samping
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: ListView(
+                child: ListView( // <--- Sudah menggunakan ListView, jadi aman dari overflow vertikal
                   children: [
                     const SizedBox(height: 20), // Jarak kecil di atas Main Card
                     // ================= MAIN CARD =================
                     Container(
-                      // 2. Padding di dalam Container memberikan ruang yang cukup
-                      //    untuk judul di bagian atas kartu.
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
                         color: Colors.white.withOpacity(0.9),
@@ -247,10 +245,10 @@ class _HistoryPageState extends State<HistoryPage> {
                           const Text(
                             "History",
                             style: TextStyle(
-                              fontSize:
-                                  24, // Disesuaikan agar terlihat seperti judul utama di card
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black,
+                                fontSize:
+                                    24, // Disesuaikan agar terlihat seperti judul utama di card
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
                             ),
                           ),
 
@@ -300,6 +298,7 @@ class _HistoryPageState extends State<HistoryPage> {
                           const SizedBox(height: 16),
 
                           // ---------- SENSOR GRID ----------
+                          // GridView di dalam ListView sudah aman karena menggunakan shrinkWrap: true
                           GridView.count(
                             crossAxisCount: 2,
                             shrinkWrap: true,
@@ -357,12 +356,16 @@ class _HistoryPageState extends State<HistoryPage> {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text(
-                                    "${_formatDate(startDate)} - ${_formatDate(endDate)}",
-                                    style: const TextStyle(
-                                      fontSize: 15,
-                                      color: Colors.black87,
-                                      fontWeight: FontWeight.w500,
+                                  // Gunakan Flexible atau Expanded jika format tanggal bisa sangat panjang
+                                  Flexible( 
+                                    child: Text(
+                                      "${_formatDate(startDate)} - ${_formatDate(endDate)}",
+                                      style: const TextStyle(
+                                        fontSize: 15,
+                                        color: Colors.black87,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                      overflow: TextOverflow.ellipsis, // <--- Menambahkan ini untuk jaga-jaga
                                     ),
                                   ),
                                   const Icon(
@@ -388,6 +391,8 @@ class _HistoryPageState extends State<HistoryPage> {
       ),
     );
   }
+
+  // ... (Sisa fungsi _sensorButtonIcon, _deleteHistoryButton, selectDateRange, dan _formatDate tidak berubah)
 
   // =====================================================================
   // 	SENSOR BUTTON (Menggunakan ikon dan warna dari gambar)
@@ -556,7 +561,7 @@ class _HistoryPageState extends State<HistoryPage> {
               ),
             ),
             SizedBox(width: 8),
-            Icon(Icons.cached, color: Colors.white, size: 20),
+            Icon(Icons.delete_forever, color: Colors.white, size: 20), // Ganti dari Icons.cached ke Icons.delete_forever
           ],
         ),
       ),
