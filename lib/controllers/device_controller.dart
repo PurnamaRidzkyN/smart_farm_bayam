@@ -15,13 +15,26 @@ class DeviceController {
     });
   }
 
-  // Update status
+  Future<bool> _canEdit() async {
+    final snap = await refs.configThresholdRef.child("is_manual").get();
+    if (!snap.exists) return true; 
+    return snap.value == true;
+  }
+
   Future<void> updateDevice(String key, bool value) async {
+    final allowed = await _canEdit();
+    if (!allowed) {
+      // Lagi mode otomatis, jangan sentuh apa-apa
+      throw Exception("Device tidak bisa diubah dalam mode otomatis silahkan ganti ke mode manual dibagian config");
+    }
     await refs.deviceRef.child(key).set(value);
   }
 
-  // Update semua sekaligus
   Future<void> updateAll(DeviceModel device) async {
+    final allowed = await _canEdit();
+    if (!allowed) {
+      throw Exception("Device tidak bisa diubah dalam mode otomatis silahkan ganti ke mode manual dibagian config");
+    }
     await refs.deviceRef.set(device.toMap());
   }
 }

@@ -16,7 +16,9 @@ class _DevicePageState extends State<DevicePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFE8FFF4), // hijau sangat muda (background)
+      backgroundColor: const Color(
+        0xFFE8FFF4,
+      ), // hijau sangat muda (background)
       body: StreamBuilder<DeviceModel>(
         stream: controller.getDeviceStream(),
         builder: (context, snapshot) {
@@ -48,7 +50,10 @@ class _DevicePageState extends State<DevicePage> {
                     children: const [
                       Text(
                         "Control Device",
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       SizedBox(width: 8),
                     ],
@@ -64,8 +69,9 @@ class _DevicePageState extends State<DevicePage> {
                   buildItem(
                     title: "Pompa Nutrisi",
                     value: device.pumpNutrient,
-                    onChanged: (v) => controller.updateDevice('pump_nutrient', v),
-                  )
+                    onChanged: (v) =>
+                        controller.updateDevice('pump_nutrient', v),
+                  ),
                 ],
               ),
             ),
@@ -96,11 +102,36 @@ class _DevicePageState extends State<DevicePage> {
           Text(title, style: const TextStyle(fontSize: 16)),
           Switch(
             value: value,
-            onChanged: onChanged,
             activeColor: Colors.white,
             activeTrackColor: Colors.teal.shade300,
+            onChanged: (v) async {
+              try {
+                await onChanged(v); // manggil controller updateDevice
+              } catch (e) {
+                showWarning(e.toString().replaceAll('Exception: ', ''));
+                setState(
+                  () {},
+                ); // refresh lagi biar switch balik ke posisi awal
+              }
+            },
           ),
         ],
+      ),
+    );
+  }
+
+  void showWarning(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: Colors.redAccent.shade200,
+        margin: const EdgeInsets.all(16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        content: Text(
+          message,
+          style: const TextStyle(color: Colors.white, fontSize: 15),
+        ),
+        duration: const Duration(seconds: 2),
       ),
     );
   }

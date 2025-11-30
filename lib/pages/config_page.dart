@@ -232,7 +232,7 @@ class _ConfigPageState extends State<ConfigPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text(
-                        "Control Device (auto)",
+                        "Control Device (Manual)",
                         style: TextStyle(fontSize: 16),
                       ),
                       Switch(
