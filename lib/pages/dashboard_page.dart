@@ -17,25 +17,46 @@ class _DashboardPageState extends State<DashboardPage> {
   @override
   void initState() {
     super.initState();
+
+    // 1. Load thresholds
+    controller.loadThresholds().then((_) {
+      // Bersihkan data lama sebelum page aktif
+      Future.microtask(() => controller.moveOldDataToHistory(DateTime.now()));
+    });
+
+    // 2. Ambil current reading awal untuk tampil di UI
     controller.getCurrent().then((initial) {
+      if (!mounted) return;
       setState(() {
         data = initial ?? {};
       });
     });
-    // Bersihkan data lama ke history saat login
-    Future.microtask(() => controller.moveOldDataToHistory(DateTime.now()));
 
-    // Stream realtime untuk UI
+    // 3. Listener realtime data baru dari sensor
     controller.getLastSensorData().listen((newData) async {
-      if (newData.isNotEmpty) {
-        controller.updateCurrentReading(newData);
-        controller.saveIfChanged(newData);
-      }
+      if (newData.isEmpty) return;
 
-      final latest = await controller.getCurrent();
+      // 1. Format semua angka ke 2 desimal
+      final formattedData = newData.map(
+        (k, v) =>
+            MapEntry(k, (v is num) ? double.parse(v.toStringAsFixed(2)) : v),
+      );
 
+      // 2. Update current reading
+      await controller.updateCurrentReading(formattedData);
+
+      // 3. Simpan ke history & hapus dataRef
+      await controller.moveOldDataToHistory(DateTime.now());
+      // ← sekarang dipanggil tiap ada data baru
+
+      // 4. Update UI langsung
+      if (!mounted) return;
       setState(() {
-        data = latest ?? {};
+        data = {
+          ...data!,
+          ...formattedData,
+          'unix_ms': DateTime.now().millisecondsSinceEpoch,
+        };
       });
     });
   }
@@ -127,7 +148,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                 ),
                               ),
                               Text(
-                                formatIso(data?["timestamp_iso"]),
+                                formatUnixMs(data?["unix_ms"]),
                                 style: const TextStyle(fontSize: 14),
                               ),
                             ],
@@ -257,15 +278,12 @@ class _DashboardPageState extends State<DashboardPage> {
     return Colors.green;
   }
 
-
-  String formatIso(String? iso) {
-    if (iso == null || iso.isEmpty) return "-";
-    try {
-      final dt = DateTime.parse(iso).toLocal();
-      return "${dt.day.toString().padLeft(2, '0')}-"
-          "${dt.month.toString().padLeft(2, '0')}-${dt.year}";
-    } catch (e) {
-      return iso;
-    }
+  String formatUnixMs(dynamic unixMs) {
+    if (unixMs == null) return "-";
+    // konversi dynamic -> int
+    final ms = (unixMs is double) ? unixMs.toInt() : unixMs as int;
+    final dt = DateTime.fromMillisecondsSinceEpoch(ms).toLocal();
+    return "${dt.year}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')} "
+        "${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}";
   }
 }

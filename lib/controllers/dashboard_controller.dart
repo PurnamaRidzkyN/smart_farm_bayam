@@ -52,7 +52,6 @@ class DashboardController {
       // Kalau node current_reading belum ada, buat langsung
       await refs.currentReadingRef.set({
         ...newData,
-        'timestamp_iso': now.toUtc().toIso8601String(),
         'unix_ms': now.millisecondsSinceEpoch,
       });
       return;
@@ -64,12 +63,9 @@ class DashboardController {
     await refs.currentReadingRef.set({
       ...current,
       ...newData,
-      'timestamp_iso': now.toUtc().toIso8601String(),
       'unix_ms': now.millisecondsSinceEpoch,
     });
   }
-
-
 
   // Load threshold
   Future<void> loadThresholds() async {
@@ -145,7 +141,6 @@ class DashboardController {
 
       final entryTime = DateTime.fromMillisecondsSinceEpoch(timestamp);
       if (!entryTime.isBefore(loginTime)) continue;
-
       final data = Map<String, dynamic>.from(entry.value);
 
       // Check 4 sensor
@@ -206,6 +201,7 @@ class DashboardController {
       await refs.historyRef.child(key).child(unixMs).set(newData[key]);
     }
   }
+
   // buat peringatan
   Future<void> loadConfig() async {
     final snapshot = await refs.configThresholdRef.get();
