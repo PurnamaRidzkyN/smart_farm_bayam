@@ -18,38 +18,36 @@ class _DashboardPageState extends State<DashboardPage> {
   void initState() {
     super.initState();
 
+    _initializeController();
+  }
+
+  Future<void> _initializeController() async {
     // 1. Load thresholds
-    controller.loadThresholds().then((_) {
-      // Bersihkan data lama sebelum page aktif
-      Future.microtask(() => controller.moveOldDataToHistory(DateTime.now()));
+    await controller.loadThresholds();
+
+    // 2. Bersihkan readings lama saat page pertama load
+    await controller.initLastValueCache();
+    await controller.moveOldDataToHistory(DateTime.now());
+
+    // 3. Ambil current reading awal untuk tampil di UI
+    final initial = await controller.getCurrent();
+    if (!mounted) return;
+    setState(() {
+      data = initial ?? {};
     });
 
-    // 2. Ambil current reading awal untuk tampil di UI
-    controller.getCurrent().then((initial) {
-      if (!mounted) return;
-      setState(() {
-        data = initial ?? {};
-      });
-    });
-
-    // 3. Listener realtime data baru dari sensor
+    // 4. Listener realtime data baru dari sensor, dimulai setelah semua selesai
     controller.getLastSensorData().listen((newData) async {
       if (newData.isEmpty) return;
 
-      // 1. Format semua angka ke 2 desimal
       final formattedData = newData.map(
         (k, v) =>
             MapEntry(k, (v is num) ? double.parse(v.toStringAsFixed(2)) : v),
       );
 
-      // 2. Update current reading
       await controller.updateCurrentReading(formattedData);
+      await controller.saveIfChanged(formattedData); // langsung ke history
 
-      // 3. Simpan ke history & hapus dataRef
-      await controller.moveOldDataToHistory(DateTime.now());
-      // ← sekarang dipanggil tiap ada data baru
-
-      // 4. Update UI langsung
       if (!mounted) return;
       setState(() {
         data = {
