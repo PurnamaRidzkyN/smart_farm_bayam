@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import '../models/history_threshold_model.dart';
 import '../helper/manager.dart';
 import '../models/config_model.dart';
@@ -121,85 +123,74 @@ class DashboardController {
 
   // Move old data to history
   Future<void> moveOldDataToHistory(DateTime loginTime) async {
-    // Baca readings sekali
     final snapshot = await refs.dataRef.get();
     if (!snapshot.exists) return;
 
     final readings = Map<String, dynamic>.from(snapshot.value as Map);
 
-    // Baca seluruh history sekali
-    final historySnap = await refs.historyRef.get();
-    final fullHistory = historySnap.exists
-        ? Map<String, dynamic>.from(historySnap.value as Map)
-        : {};
+    // Urutkan keys supaya diproses dari timestamp terlama
+    final sortedKeys = readings.keys.map(int.parse).toList()..sort();
 
-    final futures = <Future>[];
-
-    for (var entry in readings.entries) {
-      final timestamp = int.tryParse(entry.key);
-      if (timestamp == null) continue;
-
-      final entryTime = DateTime.fromMillisecondsSinceEpoch(timestamp);
+    for (var keyInt in sortedKeys) {
+      final key = keyInt.toString();
+      final entryTime = DateTime.fromMillisecondsSinceEpoch(keyInt);
       if (!entryTime.isBefore(loginTime)) continue;
-      final data = Map<String, dynamic>.from(entry.value);
 
-      // Check 4 sensor
-      for (var key in ['ph', 'tds_ppm', 'ec_ms_cm', 'temp_c']) {
-        final sensorValue = data[key];
-        if (sensorValue == null) continue;
+      final data = Map<String, dynamic>.from(readings[key]!);
 
-        // Ambil history map per sensor
-        final sensorHistory = (fullHistory[key] is Map)
-            ? Map<String, dynamic>.from(fullHistory[key])
-            : {};
+      // Simpan ke history jika berubah
+      await saveIfChanged(data);
 
-        final lastValue = getLastValueFromHistory(sensorHistory);
-
-        if (lastValue == null ||
-            (sensorValue - lastValue).abs() >= getThreshold(key)) {
-          // Simpan ke history dengan timestamp asli
-          futures.add(
-            refs.historyRef.child(key).child(entry.key).set(sensorValue),
-          );
-
-          // Update cache supaya next compare tidak ngeget lagi
-          sensorHistory[entry.key] = sensorValue;
-          fullHistory[key] = sensorHistory;
-        }
-      }
-
-      // Hapus dari readings
-      futures.add(refs.dataRef.child(entry.key).remove());
+      // Hapus data yang sudah dicek
+      await refs.dataRef.child(key).remove();
     }
+  }
 
-    await Future.wait(futures);
+  Map<String, double> lastValueCache = {};
+
+  Future<void> initLastValueCache() async {
+    for (var key in ['ph', 'tds_ppm', 'ec_ms_cm', 'temp_c']) {
+      final snap = await refs.historyRef.child(key).get();
+      final sensorHistory = snap.exists
+          ? Map<String, dynamic>.from(snap.value as Map)
+          : {};
+
+      final lastValue = getLastValueFromHistory(sensorHistory);
+      if (lastValue != null) {
+        lastValueCache[key] = lastValue;
+      }
+    }
   }
 
   // Simpan data baru kalau berubah lebih dari threshold
   Future<void> saveIfChanged(Map<String, dynamic> newData) async {
+    print('newData: $newData');
     if (newData.isEmpty) return;
 
-    final current = await getCurrent();
-    final changedKeys = <String>[];
-
+    final rawUnix = newData['unix_ms'];
+    if (rawUnix == null) return;
+    final unixMs = (rawUnix as num)
+        .toInt()
+        .toString(); // Kalau tidak ada unix_ms, skip
     for (var key in ['ph', 'tds_ppm', 'ec_ms_cm', 'temp_c']) {
-      final oldVal = current[key];
-      final newVal = newData[key];
+      final sensorValue = (newData[key] as num?)?.toDouble();
+      if (sensorValue == null) continue;
 
-      if (oldVal == null || newVal == null) continue;
+      final lastValue = lastValueCache[key];
+      final shouldSave =
+          (lastValue == null) ||
+          ((sensorValue - lastValue).abs() >= getThreshold(key));
 
-      if ((newVal - oldVal).abs() >= getThreshold(key)) {
-        changedKeys.add(key);
+      if (shouldSave) {
+        await refs.historyRef.child(key).child(unixMs).set(sensorValue);
+
+        // update cache lokal
+        lastValueCache[key] = sensorValue;
       }
     }
 
-    if (changedKeys.isEmpty) return;
-
-    final unixMs = DateTime.now().millisecondsSinceEpoch.toString();
-
-    for (var key in changedKeys) {
-      await refs.historyRef.child(key).child(unixMs).set(newData[key]);
-    }
+    // Hapus data lama di dataRef setelah disimpan ke history
+    await refs.dataRef.child(unixMs).remove();
   }
 
   // buat peringatan
