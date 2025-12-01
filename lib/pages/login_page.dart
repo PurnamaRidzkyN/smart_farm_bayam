@@ -25,17 +25,20 @@ class _LoginPageState extends State<LoginPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                width: 90,
-                height: 90,
+                width: 300,
+                height: 300,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF4CAF50),
+                  // color: const Color(0xFF4CAF50),
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: const Icon(Icons.eco, size: 60, color: Colors.white),
+                child: Image.asset(
+                  'images/logo_hydroponik.png',
+                  fit: BoxFit.contain,
+                ),
               ),
               const SizedBox(height: 20),
               const Text(
-                "Smart Farm",
+                "GreenFlow",
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,

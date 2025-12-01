@@ -160,122 +160,135 @@ class _ConfigPageState extends State<ConfigPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFE8FFF4),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.8),
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  blurRadius: 12,
-                  color: Colors.black.withOpacity(0.05),
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: const [
-                    Text(
-                      "Smart Farm Setting",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
+      // PERBAIKAN: Bungkus body dengan SafeArea untuk menghindari tumpang tindih dengan status bar
+      body: SafeArea(
+        child: ListView(
+          // Hapus padding 16 dari ListView dan pindahkan ke Container utama
+          padding: EdgeInsets.zero, 
+          children: [
+            // Tambahkan padding di atas Container untuk memberi ruang judul 
+            // agar tidak terlalu mepet dengan status bar/notch
+            const SizedBox(height: 16), 
+
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.8),
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      blurRadius: 12,
+                      color: Colors.black.withOpacity(0.05),
+                      offset: const Offset(0, 4),
                     ),
-                    SizedBox(width: 8),
                   ],
                 ),
-                const SizedBox(height: 16),
-
-                const Text(
-                  "Edit Batas Sensor",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 10),
-
-                buildSensorSection("pH", fields['ph_min']!, fields['ph_max']!),
-                buildSensorSection(
-                  "Temperature",
-                  fields['temp_min_c']!,
-                  fields['temp_max_c']!,
-                ),
-                buildSensorSection(
-                  "TDS",
-                  fields['tds_min_ppm']!,
-                  fields['tds_max_ppm']!,
-                ),
-                buildSensorSection(
-                  "EC",
-                  fields['ec_min_ms_cm']!,
-                  fields['ec_max_ms_cm']!,
-                ),
-
-                const SizedBox(height: 20),
-
-                // Switch IS MANUAL
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFE8FFF4),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        "Control Device (Manual)",
-                        style: TextStyle(fontSize: 16),
-                      ),
-                      Switch(
-                        value: isManual,
-                        onChanged: (v) {
-                          setState(() {
-                            isManual = v;
-                            fields['is_manual']!.text = v.toString();
-                          });
-                        },
-                        activeColor: Colors.white,
-                        activeTrackColor: Colors.teal.shade300,
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 20),
-
-                ElevatedButton(
-                  onPressed: _save,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.teal.shade400,
-                    minimumSize: const Size(double.infinity, 48),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: const [
+                        Text(
+                          "Smart Farm Setting",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(width: 8),
+                      ],
                     ),
-                  ),
-                  child: const Text(
-                    "Simpan Perubahan",
-                    style: TextStyle(color: Colors.white),
-                  ),
+                    const SizedBox(height: 16),
+
+                    const Text(
+                      "Edit Batas Sensor",
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 10),
+
+                    buildSensorSection("pH", fields['ph_min']!, fields['ph_max']!),
+                    buildSensorSection(
+                      "Temperature",
+                      fields['temp_min_c']!,
+                      fields['temp_max_c']!,
+                    ),
+                    buildSensorSection(
+                      "TDS",
+                      fields['tds_min_ppm']!,
+                      fields['tds_max_ppm']!,
+                    ),
+                    buildSensorSection(
+                      "EC",
+                      fields['ec_min_ms_cm']!,
+                      fields['ec_max_ms_cm']!,
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    // Switch IS MANUAL
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE8FFF4),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            "Control Device (Manual)",
+                            style: TextStyle(fontSize: 16),
+                          ),
+                          Switch(
+                            value: isManual,
+                            onChanged: (v) {
+                              setState(() {
+                                isManual = v;
+                                fields['is_manual']!.text = v.toString();
+                              });
+                            },
+                            activeColor: Colors.white,
+                            activeTrackColor: Colors.teal.shade300,
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    ElevatedButton(
+                      onPressed: _save,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.teal.shade400,
+                        minimumSize: const Size(double.infinity, 48),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                      child: const Text(
+                        "Simpan Perubahan",
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
-          ),
-        ],
+            // Tambahkan jarak di bagian bawah ListView
+            const SizedBox(height: 40),
+          ],
+        ),
       ),
     );
   }
 
   // ===============================
-  //     UI FOR MIN / MAX INPUT
+  // 	UI FOR MIN / MAX INPUT
   // ===============================
   Widget buildSensorSection(
     String title,
@@ -331,10 +344,16 @@ class _ConfigPageState extends State<ConfigPage> {
         color: const Color(0xFFDFFEF0),
         borderRadius: BorderRadius.circular(20),
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      // Padding horizontal 16 aman karena TextField memiliki padding internal
+      padding: const EdgeInsets.symmetric(horizontal: 16), 
       child: TextField(
         controller: controller,
-        decoration: InputDecoration(hintText: hint, border: InputBorder.none),
+        // PERBAIKAN: Gunakan contentPadding agar teks lebih senter vertikal
+        decoration: InputDecoration(
+          hintText: hint, 
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(vertical: 12),
+        ),
         keyboardType: TextInputType.number,
       ),
     );
