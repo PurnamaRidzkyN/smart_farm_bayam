@@ -133,10 +133,10 @@ class _DashboardPageState extends State<DashboardPage> {
                         ),
                         child: Row(
                           children: [
-                            const Icon(
-                              Icons.local_florist,
-                              size: 40,
-                              color: Color(0xFF38A3A5), // Warna hijau teal
+                            Image.asset(
+                              "images/logo_hydroponik.png",
+                              width: 125,
+                              height: 125,  
                             ),
                             const SizedBox(width: 12),
                             Column(
