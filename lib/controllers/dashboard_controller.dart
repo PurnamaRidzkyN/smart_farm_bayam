@@ -164,7 +164,6 @@ class DashboardController {
 
   // Simpan data baru kalau berubah lebih dari threshold
   Future<void> saveIfChanged(Map<String, dynamic> newData) async {
-    print('newData: $newData');
     if (newData.isEmpty) return;
 
     final rawUnix = newData['unix_ms'];
@@ -198,11 +197,16 @@ class DashboardController {
     final snapshot = await refs.configThresholdRef.get();
     if (!snapshot.exists) {
       config = null;
-      return;
-    }
+    } else {
+      final rawValue = snapshot.value;
 
-    final data = Map<String, dynamic>.from(snapshot.value as Map);
-    config = ConfigModel.fromMap(data);
+      if (rawValue is Map) {
+        final data = Map<String, dynamic>.from(rawValue);
+        config = ConfigModel.fromMap(data);
+      } else {
+        config = null; 
+      }
+    }
 
     _generateThresholdMap();
   }

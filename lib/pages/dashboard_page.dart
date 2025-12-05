@@ -80,7 +80,8 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   Widget buildDashboard(BuildContext context) {
-    return Scaffold( // Menggunakan Scaffold untuk latar belakang dan struktur
+    return Scaffold(
+      // Menggunakan Scaffold untuk latar belakang dan struktur
       backgroundColor: const Color(0xFFE6FFF2), // Latar belakang Dashboard
       body: SafeArea(
         child: Container(
@@ -113,7 +114,7 @@ class _DashboardPageState extends State<DashboardPage> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: const [
                           Text(
-                            "Smart Farm",
+                            "GreenFlow",
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
@@ -136,7 +137,7 @@ class _DashboardPageState extends State<DashboardPage> {
                             Image.asset(
                               "images/logo_hydroponik.png",
                               width: 125,
-                              height: 125,  
+                              height: 125,
                             ),
                             const SizedBox(width: 12),
                             Column(
@@ -168,11 +169,11 @@ class _DashboardPageState extends State<DashboardPage> {
                         physics: const NeverScrollableScrollPhysics(),
                         gridDelegate:
                             const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          crossAxisSpacing: 14,
-                          mainAxisSpacing: 14,
-                          childAspectRatio: 1.1,
-                        ),
+                              crossAxisCount: 2,
+                              crossAxisSpacing: 14,
+                              mainAxisSpacing: 14,
+                              childAspectRatio: 1.1,
+                            ),
                         children: [
                           sensorBox(
                             "pH Level",
@@ -209,13 +210,13 @@ class _DashboardPageState extends State<DashboardPage> {
                   ),
                 ),
                 // Padding di bawah card agar tidak terlalu mepet dengan BottomNavBar
-                const SizedBox(height: 80), 
+                const SizedBox(height: 80),
               ],
             ),
           ),
         ),
       ),
-      // Jika Anda menggunakan BottomNavigationBar di sini (diasumsikan), 
+      // Jika Anda menggunakan BottomNavigationBar di sini (diasumsikan),
       // pastikan Scaffold menanganinya dengan benar.
       // Jika BottomNavigationBar adalah bagian dari layout parent, abaikan ini.
     );
@@ -229,7 +230,7 @@ class _DashboardPageState extends State<DashboardPage> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFFDFFBEF), 
+        color: const Color(0xFFDFFBEF),
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
@@ -241,30 +242,28 @@ class _DashboardPageState extends State<DashboardPage> {
       ),
       child: Column(
         // PERBAIKAN 1: Gunakan CrossAxisAlignment.center agar rata tengah horizontal
-        crossAxisAlignment: CrossAxisAlignment.center, 
+        crossAxisAlignment: CrossAxisAlignment.center,
         // PERBAIKAN 2: Gunakan MainAxisAlignment.spaceBetween untuk memastikan dot di atas dan judul di bawah
-        mainAxisAlignment: MainAxisAlignment.spaceBetween, 
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           // Dot Status (ditempatkan di pojok kanan atas)
           // Menggunakan Row untuk menempatkan dot di kanan dan Padding/Spacer di kiri
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Icon(Icons.circle, size: 10, color: dotColor),
-            ],
+            children: [Icon(Icons.circle, size: 10, color: dotColor)],
           ),
-          
+
           // Nilai Sensor
           Text(
             value,
             style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
             // PERBAIKAN 3: Text Aligment Center memastikan teks senter di widget Text
-            textAlign: TextAlign.center, 
+            textAlign: TextAlign.center,
           ),
 
           // Judul Sensor
           Text(
-            title, 
+            title,
             style: const TextStyle(fontSize: 13, color: Colors.black87),
             textAlign: TextAlign.center, // Memastikan teks judul juga senter
           ),
@@ -296,10 +295,12 @@ class _DashboardPageState extends State<DashboardPage> {
     if (!thresholds.containsKey(key)) return Colors.grey;
 
     final value = (data![key] ?? 0).toDouble();
-    
-    // Perbaikan untuk mengakses min/max dari sub-map 
-    final thresholdMap = thresholds[key] is Map ? (thresholds[key] as Map<String, dynamic>) : {};
-    
+
+    // Perbaikan untuk mengakses min/max dari sub-map
+    final thresholdMap = thresholds[key] is Map
+        ? (thresholds[key] as Map<String, dynamic>)
+        : {};
+
     final double min = (thresholdMap["min"] as num?)?.toDouble() ?? 0.0;
     final double max = (thresholdMap["max"] as num?)?.toDouble() ?? 99999.0;
 
@@ -311,18 +312,18 @@ class _DashboardPageState extends State<DashboardPage> {
         tolerance = 0.5; // pH 6.5-7.5 (Normal)
         break;
       case "temp_c":
-        tolerance = 5.0; // Temp 20-30°C (Normal)
+        tolerance = 1; // Temp 20-30°C (Normal)
         break;
       case "tds_ppm":
+        tolerance = 100; // TDS 800-1000 (Normal)
       case "ec_ms_cm":
         // Asumsi batas min/max TDS/EC lebih ketat
-        tolerance = (max - min) * 0.1; 
-        if (tolerance < 10) tolerance = 10; // min 10 ppm warning
+        tolerance = (max - min) * 0.1;
         break;
       default:
         tolerance = 0.0;
     }
-    
+
     // Batas Warning: sedikit di dalam batas min/max
     final double warnMin = min + tolerance;
     final double warnMax = max - tolerance;
@@ -330,13 +331,13 @@ class _DashboardPageState extends State<DashboardPage> {
     // 1. --- DANGER ---
     // Di luar batas min atau max
     if (value < min || value > max) {
-        return Colors.red;
+      return Colors.red;
     }
-    
+
     // 2. --- WARNING ---
     // Di antara batas min dan warnMin ATAU di antara warnMax dan max
     if (value < warnMin || value > warnMax) {
-        return Colors.orange;
+      return Colors.orange;
     }
 
     // 3. --- NORMAL ---
