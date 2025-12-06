@@ -7,21 +7,12 @@ void main() {
   late DeviceController controller;
   late MockDeviceFirebaseRefs mockRefs;
 
+  // --- PERBAIKAN HELPER ---
   MockDeviceFirebaseRefs createMockRefs({
     required bool isManual,
     required Map<String, dynamic>? deviceData,
   }) {
-    final deviceSnapshot = MockDataSnapshot(
-      exists: deviceData != null,
-      value: deviceData,
-    );
-
-    final configSnapshot = MockDataSnapshot(exists: true, value: isManual);
-
-    final deviceRef = MockDatabaseReference(snapshot: deviceSnapshot);
-    final configRef = MockDatabaseReference(snapshot: configSnapshot);
-
-    return MockDeviceFirebaseRefs(device: deviceRef, config: configRef);
+    return MockDeviceFirebaseRefs(initialData: deviceData, isManual: isManual);
   }
 
   test('getDeviceStream returns correct DeviceModel', () async {

@@ -4,14 +4,22 @@ import '../models/device_model.dart';
 import '../app_globals.dart';
 
 class DevicePage extends StatefulWidget {
-  const DevicePage({super.key});
+  final DeviceController? controller;
+
+  const DevicePage({super.key, this.controller});
 
   @override
   State<DevicePage> createState() => _DevicePageState();
 }
 
 class _DevicePageState extends State<DevicePage> {
-  final DeviceController controller = DeviceController(AppGlobals.refs);
+  late final DeviceController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = widget.controller ?? DeviceController(AppGlobals.refs);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +43,7 @@ class _DevicePageState extends State<DevicePage> {
               child: Column(
                 children: [
                   // PERBAIKAN 2: Tambahkan ruang di atas konten untuk estetika judul
-                  const SizedBox(height: 16), 
+                  const SizedBox(height: 16),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Container(
@@ -72,7 +80,8 @@ class _DevicePageState extends State<DevicePage> {
                           buildItem(
                             title: "Pompa Asam",
                             value: device.pumpAcid,
-                            onChanged: (v) => controller.updateDevice('pump_acid', v),
+                            onChanged: (v) =>
+                                controller.updateDevice('pump_acid', v),
                           ),
                           buildItem(
                             title: "Pompa Nutrisi",
@@ -80,11 +89,11 @@ class _DevicePageState extends State<DevicePage> {
                             onChanged: (v) =>
                                 controller.updateDevice('pump_nutrient', v),
                           ),
-                          
+
                           // Tambahkan item lain di sini jika ada...
-                          
+
                           // Tambahkan padding di bagian bawah container
-                          const SizedBox(height: 16), 
+                          const SizedBox(height: 16),
                         ],
                       ),
                     ),
