@@ -48,6 +48,7 @@ class _LoginPageState extends State<LoginPage> {
 
               // Email
               TextField(
+                key: const Key("emailField"),
                 controller: controller.emailController,
                 decoration: InputDecoration(
                   hintText: 'Email',
@@ -63,6 +64,7 @@ class _LoginPageState extends State<LoginPage> {
 
               // Password
               TextField(
+                key: const Key("passwordField"),
                 controller: controller.passwordController,
                 obscureText: obscure,
                 decoration: InputDecoration(
@@ -92,6 +94,7 @@ class _LoginPageState extends State<LoginPage> {
                 width: double.infinity,
                 height: 48,
                 child: ElevatedButton(
+                  key: const Key("loginButton"),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF4CAF50),
                     shape: RoundedRectangleBorder(

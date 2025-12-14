@@ -61,7 +61,80 @@ void main() {
       isManual: true,
     );
 
-    // Tidak perlu verify mockito, cukup pastikan tidak throw
     await controller.saveConfig(config);
+  });
+  test('saveConfig throws error when value is NaN', () async {
+    final config = ConfigModel(
+      phMin: double.nan,
+      phMax: 6.5,
+      tdsMin: 200,
+      tdsMax: 600,
+      ecMin: 1.8,
+      ecMax: 2.3,
+      tempMin: 20,
+      tempMax: 30,
+      isManual: true,
+    );
+
+    expect(
+      () async => await controller.saveConfig(config),
+      throwsA(
+        predicate(
+          (e) =>
+              e is Exception &&
+              e.toString().contains('pH Minimum harus berupa angka'),
+        ),
+      ),
+    );
+  });
+  test('saveConfig throws error when value is negative', () async {
+    final config = ConfigModel(
+      phMin: -1,
+      phMax: 6.5,
+      tdsMin: 200,
+      tdsMax: 600,
+      ecMin: 1.8,
+      ecMax: 2.3,
+      tempMin: 20,
+      tempMax: 30,
+      isManual: true,
+    );
+
+    expect(
+      () async => await controller.saveConfig(config),
+      throwsA(
+        predicate(
+          (e) =>
+              e is Exception &&
+              e.toString().contains('pH Minimum tidak boleh negatif'),
+        ),
+      ),
+    );
+  });
+  test('saveConfig throws error when min is greater than max', () async {
+    final config = ConfigModel(
+      phMin: 7.0,
+      phMax: 6.0,
+      tdsMin: 200,
+      tdsMax: 600,
+      ecMin: 1.8,
+      ecMax: 2.3,
+      tempMin: 20,
+      tempMax: 30,
+      isManual: true,
+    );
+
+    expect(
+      () async => await controller.saveConfig(config),
+      throwsA(
+        predicate(
+          (e) =>
+              e is Exception &&
+              e.toString().contains(
+                'pH Minimum tidak boleh lebih besar dari pH Maximum',
+              ),
+        ),
+      ),
+    );
   });
 }
