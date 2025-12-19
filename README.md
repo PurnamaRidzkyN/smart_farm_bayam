@@ -102,7 +102,37 @@ Greenflow adalah solusi manajemen smart farming berbasis IoT yang dirancang khus
      ```
      diagram.json
      ```
-   * Klik ikon **▶️ Play (Wokwi Play Button)**
+# 📦 Cara Membuat APK Agar Dapat Dibagikan (Release)
+
+Bagian ini menjelaskan langkah singkat untuk menghasilkan **APK release** dari aplikasi Greenflow agar dapat dibagikan dan diinstal pada perangkat Android lain.
+
+1. **Pastikan Konfigurasi Sudah Siap**
+   - Dependency Flutter sudah terinstal
+   - Firebase sudah terhubung
+   - File `google-services.json` sudah berada di folder:
+     ```
+     android/app/
+     ```
+
+2. **Build APK Release**
+   Jalankan perintah berikut pada root project Flutter:
+   ```bash
+   flutter build apk --release
+    ````
+
+3. **Hasil APK**
+   Setelah proses build selesai, file APK akan tersimpan di:
+
+   ```
+   build/app/outputs/flutter-apk/app-release.apk
+   ```
+
+4. **Distribusi APK**
+   File `app-release.apk` dapat dibagikan dan diinstal secara manual pada perangkat Android dengan mengaktifkan izin **Install from unknown sources**.
+
+> **Catatan:**
+> APK release digunakan untuk distribusi aplikasi. Untuk keperluan pengembangan dan debugging, gunakan `flutter run`.
+
 
 ## Penutup
 Aplikasi **Greenflow** dikembangkan oleh **Kelompok 2 – Sayuran Hidroponik** sebagai proyek smart farming berbasis IoT. Proyek ini dibuat untuk mengintegrasikan simulasi sensor, sistem kontrol otomatis dan manual, serta aplikasi mobile dalam satu sistem pemantauan dan pengelolaan budidaya bayam hidroponik.
