@@ -4,28 +4,27 @@ Greenflow adalah solusi manajemen smart farming berbasis IoT yang dirancang khus
 # 🚀 Fitur Utama
 1. **Fitur Sensor (Wokwi)**
 
-    Modul Sensor berfungsi untuk melakukan pembacaan data dari sensor yang disimulasikan menggunakan platform Wokwi. Nilai sensor diperoleh melalui data acak (random) atau melalui pengaturan slider yang merepresentasikan kondisi lingkungan secara real-time. Data yang telah dibaca kemudian dikirimkan ke Firebase sebagai basis data utama agar dapat diakses oleh modul lain, seperti modul kontrol, history, dan alert.
-    Modul Kontrol (App & Wokwi)
-    Modul Kontrol bertugas mengatur proses pengendalian perangkat berdasarkan mode yang dipilih, yaitu mode AUTO dan MANUAL.
+    Fitur Sensor berfungsi untuk melakukan pembacaan data dari sensor yang disimulasikan menggunakan platform Wokwi. Nilai sensor diperoleh melalui data acak (random) atau melalui pengaturan slider yang merepresentasikan kondisi lingkungan secara real-time. Data yang telah dibaca kemudian dikirimkan ke Firebase sebagai basis data utama agar dapat diakses oleh Fitur lain, seperti Fitur kontrol, history, dan alert.
+    Fitur Kontrol (App & Wokwi)
+    Fitur Kontrol bertugas mengatur proses pengendalian perangkat berdasarkan mode yang dipilih, yaitu mode AUTO dan MANUAL.
     Jika Mode = AUTO: Wokwi membaca sensor -> Putuskan nyala/mati -> Update Firebase.
     Jika Mode = MANUAL: App kirim status ON/OFF -> Firebase -> Wokwi baca dan eksekusi.
 
 2. **Fitur History** 
 
-    Modul History berfungsi untuk menyimpan riwayat data sensor yang diterima dari setiap sensor secara berkala. Data historis ini digunakan untuk memantau perubahan kondisi lingkungan dari waktu ke waktu serta menjadi bahan evaluasi dan analisis kinerja sistem. Riwayat data juga dapat dimanfaatkan untuk pengambilan keputusan di masa mendatang.
-    Modul information 
+    Fitur History berfungsi untuk menyimpan riwayat data sensor yang diterima dari setiap sensor secara berkala. Data historis ini digunakan untuk memantau perubahan kondisi lingkungan dari waktu ke waktu serta menjadi bahan evaluasi dan analisis kinerja sistem. Riwayat data juga dapat dimanfaatkan untuk pengambilan keputusan di masa mendatang.
 
-3. **Modul information**
+3. **Fitur information**
 
-    Modul Information digunakan untuk menyimpan dan menampilkan berbagai informasi yang berkaitan dengan tanaman atau kebutuhan pengguna. Informasi yang disediakan dapat berupa panduan perawatan tanaman, deskripsi sensor, maupun informasi pendukung lainnya. Modul ini membantu pengguna dalam memahami kondisi tanaman dan cara pengelolaannya secara lebih optimal. 
+    Fitur Information digunakan untuk menyimpan dan menampilkan berbagai informasi yang berkaitan dengan tanaman atau kebutuhan pengguna. Informasi yang disediakan dapat berupa panduan perawatan tanaman, deskripsi sensor, maupun informasi pendukung lainnya. Fitur ini membantu pengguna dalam memahami kondisi tanaman dan cara pengelolaannya secara lebih optimal. 
 
-4. **Modul alert**
+4. **Fitur alert**
 
-    Modul Alert berfungsi untuk memberikan peringatan kepada pengguna apabila nilai sensor melewati batas minimum atau maksimum yang telah ditentukan. Peringatan ini dapat berupa notifikasi pada aplikasi sehingga pengguna dapat segera mengambil tindakan yang diperlukan. Modul ini berperan penting dalam mencegah kondisi yang dapat merusak tanaman atau sistem.
+    Fitur Alert berfungsi untuk memberikan peringatan kepada pengguna apabila nilai sensor melewati batas minimum atau maksimum yang telah ditentukan. Peringatan ini dapat berupa notifikasi pada aplikasi sehingga pengguna dapat segera mengambil tindakan yang diperlukan. Fitur ini berperan penting dalam mencegah kondisi yang dapat merusak tanaman atau sistem.
 
-5. **Modul  configurasi**
+5. **Fitur  configurasi**
 
-    Modul Konfigurasi digunakan untuk menyimpan dan mengelola pengaturan sistem, termasuk batas minimum dan maksimum dari setiap sensor serta perubahan mode kontrol (AUTO atau MANUAL). Pengaturan yang disimpan pada modul ini akan menjadi acuan bagi modul kontrol dan modul alert dalam menjalankan fungsinya. Dengan adanya modul konfigurasi, sistem menjadi lebih fleksibel dan dapat disesuaikan dengan kebutuhan pengguna.
+    Fitur Konfigurasi digunakan untuk menyimpan dan mengelola pengaturan sistem, termasuk batas minimum dan maksimum dari setiap sensor serta perubahan mode kontrol (AUTO atau MANUAL). Pengaturan yang disimpan pada Fitur ini akan menjadi acuan bagi Fitur kontrol dan Fitur alert dalam menjalankan fungsinya. Dengan adanya Fitur konfigurasi, sistem menjadi lebih fleksibel dan dapat disesuaikan dengan kebutuhan pengguna.
 
 # 📦 Instalasi (Flutter)
 
@@ -47,10 +46,64 @@ Greenflow adalah solusi manajemen smart farming berbasis IoT yang dirancang khus
     ```bash
     $ flutter run
 
+
 # 📦 Instalasi (IOT)
 
 1. **Clone Repository**
    ```bash
    $ git clone https://github.com/aqilrahmat3/smartfarmbayam.git
+   $ cd smartfarmbayam
+    ````
 
-2. **Bikin .env**
+2. **Buat File Konfigurasi (`env.h`)**
+
+   Setelah repository di-clone, **WAJIB** membuat file konfigurasi Firebase.
+
+   * Masuk ke folder:
+
+     ```
+     src/
+     ```
+
+   * Salin file contoh:
+
+     ```bash
+     cp env_example.h env.h
+     ```
+
+   * Isi file `env.h` sesuai konfigurasi Firebase:
+
+     ```cpp
+     #define FIREBASE_HOST "your-project-id.firebaseio.com"
+     #define FIREBASE_EMAIL "your-email@gmail.com"
+     #define FIREBASE_PASSWORD "your-password"
+     #define FIREBASE_API_KEY "your-api-key"
+     ```
+
+   > **Catatan:**
+   > File `env.h` berisi data sensitif dan tidak boleh diunggah ke repository publik.
+
+3. **Pastikan Extension VS Code Terpasang**
+
+   Proyek IoT ini dijalankan menggunakan **Visual Studio Code**, dengan extension berikut:
+
+   * **PlatformIO**
+   * **Wokwi**
+
+   Tanpa kedua extension tersebut, simulasi tidak dapat dijalankan.
+
+4. **Build proyek menggunakan PlatformIO (satu kali) sebelum menjalankan diagram.json**
+
+5. **Jalankan Simulasi Wokwi**
+
+   * Buka proyek menggunakan **Visual Studio Code**
+   * Buka file:
+
+     ```
+     diagram.json
+     ```
+   * Klik ikon **▶️ Play (Wokwi Play Button)**
+
+## Penutup
+Aplikasi **Greenflow** dikembangkan oleh **Kelompok 2 – Sayuran Hidroponik** sebagai proyek smart farming berbasis IoT. Proyek ini dibuat untuk mengintegrasikan simulasi sensor, sistem kontrol otomatis dan manual, serta aplikasi mobile dalam satu sistem pemantauan dan pengelolaan budidaya bayam hidroponik.
+
